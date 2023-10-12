@@ -1,0 +1,49 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32929.385
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTinderGoogleDocsTests", "..\SharpTinderGoogleDocsTests\SharpTinderGoogleDocsTests.csproj", "{B20BB273-04E2-43EA-AC4B-DD82F5351EE0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDocsProg", "..\..\..\17_projects\03_projects\SharpGoogleDocs\SharpGoogleDocsProg\SharpGoogleDocsProg.csproj", "{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTinderGoogleDocsProg", "SharpTinderGoogleDocsProg.csproj", "{1E6929DB-3FFD-4C45-BC4E-32BB364F4FD7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDriveProg", "..\..\..\17_projects\03_projects\SharpGoogleDrive\SharpGoogleDriveProg\SharpGoogleDriveProg.csproj", "{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpFileServiceProg", "..\..\..\17_projects\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj", "{4A38235E-DF30-488D-ACD2-6ACB491D03B3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B20BB273-04E2-43EA-AC4B-DD82F5351EE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B20BB273-04E2-43EA-AC4B-DD82F5351EE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B20BB273-04E2-43EA-AC4B-DD82F5351EE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B20BB273-04E2-43EA-AC4B-DD82F5351EE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E6929DB-3FFD-4C45-BC4E-32BB364F4FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E6929DB-3FFD-4C45-BC4E-32BB364F4FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E6929DB-3FFD-4C45-BC4E-32BB364F4FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E6929DB-3FFD-4C45-BC4E-32BB364F4FD7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8C1E7F95-3A7A-4F0A-9031-723208D6AA9D}
+	EndGlobalSection
+EndGlobal

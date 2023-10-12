@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Cake.Powershell" Version="2.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.2.8" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.2.8" />
+    <PackageReference Include="coverlet.collector" Version="3.1.2" />
+    <PackageReference Include="Unity.Container" Version="5.11.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\17_projects\03_projects\SharpConfig\SharpConfigProg\SharpConfigProg.csproj" />
+    <ProjectReference Include="..\..\..\17_projects\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj" />
+    <ProjectReference Include="..\..\SharpHttpRequester\SharpHttpRequesterProg\SharpHttpRequesterProg.csproj" />
+    <ProjectReference Include="..\..\..\17_projects\03_projects\SharpRepoService\SharpRepoServiceProg\SharpRepoServiceProg.csproj" />
+    <ProjectReference Include="..\..\SharpSelenium\SharpSeleniumProg\SharpSeleniumProg.csproj" />
+    <ProjectReference Include="..\..\SharpSQLite\SharpSQLiteProj\SharpSQLiteProj\SharpSQLiteProj.csproj" />
+    <ProjectReference Include="..\..\SharpSQLite\SharpSQLiteProj\SharpSQLiteProj\SharpSQLiteProj.csproj" />
+  </ItemGroup>
+
+</Project>
