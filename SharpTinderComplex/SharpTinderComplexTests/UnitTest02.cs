@@ -1,12 +1,9 @@
 ﻿using Newtonsoft.Json;
-using OpenQA.Selenium.Firefox;
-using SharpSelenium;
 using SharpTinderApiDataImport;
 using SharpTinderComplexTests.JsonObjects;
 using System.Diagnostics;
 using SharpSQLiteProj;
 using Microsoft.CodeAnalysis;
-using SharpConfigProg.Service;
 
 namespace SharpTinderComplexTests
 {
@@ -42,23 +39,23 @@ namespace SharpTinderComplexTests
             try
             {
                 // arrange
-                var configData = yamlWorker.Deserialize<Dictionary<string, object>>(configFilePath);
-                var options = new FirefoxOptions();
-                options.BrowserExecutableLocation = configData["browserPath"].ToString();
-                //options.AddArguments("--headless");
-                options.AddArguments("-profile");
-                options.AddArguments(configData["profilePath"].ToString());
+                //var configData = yamlWorker.Deserialize<Dictionary<string, object>>(configFilePath);
+                //var options = new FirefoxOptions();
+                //options.BrowserExecutableLocation = configData["browserPath"].ToString();
+                ////options.AddArguments("--headless");
+                //options.AddArguments("-profile");
+                //options.AddArguments(configData["profilePath"].ToString());
 
-                // act
-                var driver = new FirefoxDriver(configData["driverPath"].ToString(), options);
-                var sh = new SeleniumHelper(driver);
-                driver.Navigate().GoToUrl("https://tinder.com");
-                var apiToken = driver.ExecuteScript("return window.localStorage.getItem('TinderWeb/APIToken')");
-                driver.Close();
+                //// act
+                //var driver = new FirefoxDriver(configData["driverPath"].ToString(), options);
+                //var sh = new SeleniumHelper(driver);
+                //driver.Navigate().GoToUrl("https://tinder.com");
+                //var apiToken = driver.ExecuteScript("return window.localStorage.getItem('TinderWeb/APIToken')");
+                //driver.Close();
 
-                // save
-                //TestContext.WriteLine("apiToken: " + apiToken);
-                yamlWorker.SerializeToFile(configData["tinderApiTokenPath"].ToString(), apiToken);
+                //// save
+                ////TestContext.WriteLine("apiToken: " + apiToken);
+                //yamlWorker.SerializeToFile(configData["tinderApiTokenPath"].ToString(), apiToken);
             }
             catch (Exception ex)
             {
@@ -87,8 +84,10 @@ namespace SharpTinderComplexTests
             };
 
             // arrange2
-            var repo = configService.SettingsDict["winderAppDataPath"].ToString();
-            var newAddress = repoService.Methods.CreateFolder((repo, ""), "tinder");
+            var repoName = configService.SettingsDict["winderRepoName"].ToString();
+            var repo = (repoName, "");
+            var repoItem = repoService.Methods.GetItem(repo);
+            var newAddress = repoService.Methods.CreateFolder(repo, "tinder");
             var newAddress2 = repoService.Methods.CreateFolder(newAddress, "exportedApiData");
 
             // act
@@ -121,7 +120,7 @@ namespace SharpTinderComplexTests
             var apiToken = ReadApiTokenFromFile();
             var organizationUri = "https://api.gotinder.com";
             var projectNameOrId = "updates";
-            var repo = configService.SettingsDict["winderAppDataPath"].ToString();
+            var repo = configService.SettingsDict["winderRepoName"].ToString();
 
             var headers = new Dictionary<string, string>
             {
@@ -219,7 +218,7 @@ namespace SharpTinderComplexTests
         public void Phase_08c_ExportLastAccountAsText()
         {
             // arrange
-            var appData = configService.SettingsDict["winderAppDataPath"].ToString();
+            var appData = configService.SettingsDict["winderRepoName"].ToString();
             var mainAddress = (appData, "");
             var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, "tinder");
             var addressIn = repoService.Methods.GetPathsByName(

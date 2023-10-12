@@ -18,13 +18,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\17_projects\03_projects\SharpConfig\SharpConfigProg\SharpConfigProg.csproj" />
-    <ProjectReference Include="..\..\..\17_projects\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj" />
-    <ProjectReference Include="..\..\SharpHttpRequester\SharpHttpRequesterProg\SharpHttpRequesterProg.csproj" />
-    <ProjectReference Include="..\..\..\17_projects\03_projects\SharpRepoService\SharpRepoServiceProg\SharpRepoServiceProg.csproj" />
-    <ProjectReference Include="..\..\SharpSelenium\SharpSeleniumProg\SharpSeleniumProg.csproj" />
-    <ProjectReference Include="..\..\SharpSQLite\SharpSQLiteProj\SharpSQLiteProj\SharpSQLiteProj.csproj" />
-    <ProjectReference Include="..\..\SharpSQLite\SharpSQLiteProj\SharpSQLiteProj\SharpSQLiteProj.csproj" />
+    <ProjectReference Include="..\..\..\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj" />
+    <ProjectReference Include="..\..\..\03_projects\SharpConfig\SharpConfigProg\SharpConfigProg.csproj" />
+    <ProjectReference Include="..\..\..\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj" />
+    <ProjectReference Include="..\..\..\03_projects\SharpHttpRequester\SharpHttpRequesterProg\SharpHttpRequesterProg.csproj" />
+    <ProjectReference Include="..\..\..\03_projects\SharpRepoService\SharpRepoServiceProg\SharpRepoServiceProg.csproj" />
+    <ProjectReference Include="..\..\..\03_projects\SharpSQLite\SharpSQLiteProj\SharpSQLiteProj\SharpSQLiteProj.csproj" />
   </ItemGroup>
 
 </Project>

@@ -222,7 +222,7 @@ namespace SharpTinderComplexTests
 
             try
             {
-                var repo = configService.SettingsDict["winderAppDataPath"].ToString();
+                var repo = configService.SettingsDict["winderRepoName"].ToString();
                 var newAddress01 = repoService.Methods.CreateFolder((repo, ""), "tinder");
                 var newAddress02 = repoService.Methods.CreateFolder(newAddress01, "exportedApiData");
                 var accountNames = repoService.Methods.GetAllFoldersNames(newAddress02);
