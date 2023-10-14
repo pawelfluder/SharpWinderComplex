@@ -220,10 +220,10 @@ namespace SharpTinderComplexTests
             // arrange
             var appData = configService.SettingsDict["winderRepoName"].ToString();
             var mainAddress = (appData, "");
-            var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, "tinder");
+            var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, Names.MainFolderName);
             var addressIn = repoService.Methods.GetPathsByName(
                 mainAddress2, new List<string> { "exportedApiData" });
-            var addressOut = repoService.Methods.CreateFolder(mainAddress2, "conversationAsTest");
+            var addressOut = repoService.Methods.CreateFolder(mainAddress2, Names.ConversationsAsText);
             var accountNamesList = repoService.Methods.GetAllFoldersNames(addressIn);
             accountNamesList.Sort();
             var lastAccount = accountNamesList.Last(); // accountNamesList.Last();

@@ -193,7 +193,7 @@ namespace SharpTinderComplexTests
             string accountId)
         {
             var date = DateTimeToString(dataCreated);
-            var name = date + "_" + profileName + "_" + accountId;
+            var name = date + "_" + profileName.ToLower() + "_" + accountId;
 
             var tmp = TryGetAccountAddress(accountId);
             if (tmp != default)
