@@ -1,12 +1,16 @@
-﻿using SharpConfigProg.Service;
+﻿using FileServiceCoreApp;
+using SharpConfigProg.Service;
 using SharpFileServiceProg.Operations.Conversations;
 using SharpFileServiceProg.Operations.Dictionaries;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
 using SharpTinderComplexTests.JsonObjects;
 using SharpTinderComplexTests.Repetition;
+using SharpTinderComplexTests.Repetition.Names;
+using SharpTinderComplexTests.Repetition.RepoService;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
+using System.Net.Mail;
 using Unity;
 using OutBorder01 = SharpFileServiceProg.Repetition.OutBorder;
 using OutBorder02 = SharpConfigProg.Repetition.OutBorder;
@@ -24,6 +28,12 @@ namespace SharpTinderComplexTests
         private readonly IFileService fileService;
         protected readonly IConfigService configService;
 
+        protected Item RepoItem { get; private set; }
+        protected Item WinderItem { get; private set; }
+        protected Item ApiDataItem { get; private set; }
+        protected Item TextConversationsItem { get; private set; }
+        protected Item AccountItem { get; set; }
+
         protected UnitTest02Base()
         {
             fileService = MyBorder.Container.Resolve<IFileService>();
@@ -40,6 +50,32 @@ namespace SharpTinderComplexTests
             repoService = MyBorder.Container.Resolve<IRepoService>();
             //repoService.Methods.InitializeSearchFoldersPaths();
             yamlWorker = fileService.Yaml.Custom03;
+            SetItems();
+        }
+
+        protected void CreateWorkspace(string path)
+        {
+            var pathsList = new List<string>() { path };
+            var xmlWorker = new XmlWorker(fileService);
+            var path2 = path + "/" + "workspace.txt";
+            xmlWorker.Load(path2);
+            //xmlDocument.Save();
+        }
+
+        private void SetItems()
+        {
+            var repoName = configService.SettingsDict["winderRepoName"].ToString();
+            var repoAdrTuple = (repoName, "");
+            RepoItem = repoService.GetItem(repoAdrTuple);
+
+            var winderAdrTuple = repoService.Methods.CreateFolder(repoAdrTuple, FolderNames.Winder);
+            WinderItem = repoService.GetItem(winderAdrTuple);
+
+            var apiDataAdrTuple = repoService.Methods.CreateFolder(winderAdrTuple, FolderNames.ExportedApiData);
+            ApiDataItem = repoService.GetItem(apiDataAdrTuple);
+
+            var conversationsAsTextAdrTuple = repoService.Methods.CreateFolder(winderAdrTuple, FolderNames.ConversationsAsText);
+            TextConversationsItem = repoService.GetItem(conversationsAsTextAdrTuple);
         }
 
         protected List<string> GetRepoRootPaths()
@@ -54,14 +90,6 @@ namespace SharpTinderComplexTests
             return repoRootPaths;
         }
 
-        //protected void LoadConfigData()
-        //{
-        //    if (File.Exists(configFilePath))
-        //    {
-        //        ConfigData = yamlWorker.DeserializeFromFile<Dictionary<string, object>>(configFilePath);
-        //    }
-        //}
-
         protected List<PSObject> GitPushWithPassword(string repoPath, string password)
         {
             var cmd1 = "git remote -v";
@@ -74,7 +102,6 @@ namespace SharpTinderComplexTests
             //https://MvpProjects@dev.azure.com/MvpProjects/FirstMvp/_git/01_projects
             //git push https://username:password@myrepository.biz/file.git --all
             //https://www.geeksforgeeks.org/how-to-set-git-username-and-password-in-gitbash
-
 
             var cmd2 = "git push;";
             cmdList = new List<string> { cmd1 };
@@ -163,7 +190,7 @@ namespace SharpTinderComplexTests
             return buildPath2;
         }
 
-        protected string ReadApiTokenFromFile()
+        protected string ReadApiTokenFromSettings()
         {
             var apiToken = configService.SettingsDict["tinderApiToken"].ToString();
             return apiToken;
@@ -186,6 +213,30 @@ namespace SharpTinderComplexTests
             return tmp;
         }
 
+        protected string GetAccountName(
+            DateTime dataCreated,
+            string profileName,
+            string accountId)
+        {
+            var date = DateTimeToString(dataCreated);
+            var accountName = date + "_" + profileName.ToLower() + "_" + accountId;
+            return accountName;
+        }
+
+        protected (string, string) CreateAccountAddress(
+            string accountName,
+            string accountId)
+        {
+            var tmp = TryGetAccountAddress(accountId);
+            if (tmp != default)
+            {
+                return tmp;
+            }
+
+            var accountAddress = repoService.Methods.CreateFolder(ApiDataItem.AdrTuple, accountName);
+            return accountAddress;
+        }
+
         protected (string, string) CreateAccountAddress(
             (string, string) parentAddress,
             DateTime dataCreated,
@@ -205,16 +256,16 @@ namespace SharpTinderComplexTests
             return accountAddress;
         }
 
-        protected (string, string) GetAccountAddress(string accountId)
-        {
-            var address = TryGetAccountAddress(accountId);
-            if (address == default)
-            {
-                throw new Exception();
-            }
+        //protected (string, string) GetAccountAddress(string accountId)
+        //{
+        //    var address = TryGetAccountAddress(accountId);
+        //    if (address == default)
+        //    {
+        //        throw new Exception();
+        //    }
             
-            return address;
-        }
+        //    return address;
+        //}
 
         private (string, string) TryGetAccountAddress(string accountId)
         {
@@ -222,16 +273,13 @@ namespace SharpTinderComplexTests
 
             try
             {
-                var repo = configService.SettingsDict["winderRepoName"].ToString();
-                var newAddress01 = repoService.Methods.CreateFolder((repo, ""), "tinder");
-                var newAddress02 = repoService.Methods.CreateFolder(newAddress01, "exportedApiData");
-                var accountNames = repoService.Methods.GetAllFoldersNames(newAddress02);
+                var accountNames = repoService.Methods.GetAllFoldersNames(ApiDataItem.AdrTuple);
                 tmp = accountNames.Where(x => x.EndsWith(accountId)).ToList();
 
                 if (tmp.Count() == 1)
                 {
                     var name = tmp.ElementAt(0);
-                    var accountAddress = repoService.Methods.GetExistingItem(newAddress02, name);
+                    var accountAddress = repoService.Methods.GetExistingItem(ApiDataItem.AdrTuple, name);
                     return accountAddress;
                 }
             }

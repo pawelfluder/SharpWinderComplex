@@ -4,12 +4,36 @@ using SharpTinderComplexTests.JsonObjects;
 using System.Diagnostics;
 using SharpSQLiteProj;
 using Microsoft.CodeAnalysis;
+using SharpTinderComplexTests.Repetition.RepoService;
+using SharpTinderComplexTests.Repetition.Names;
 
 namespace SharpTinderComplexTests
 {
-    [TestClass]
+    
     public class UnitTest02 : UnitTest02Base
     {
+        [TestMethod]
+        public void Phase_01_OpenBrowserOnPage()
+        {
+            var browserPath = configService.SettingsDict["tinderBrowserPath"].ToString();
+            var exePath = browserPath + "/" + "FirefoxPortable.exe";
+            var url = "https://tinder.com";
+            var process = new Process();
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.FileName = exePath;
+            process.StartInfo.Arguments = url;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
+            Thread.Sleep(10000);
+            var id = process.Id;
+            process.CloseMainWindow();
+            //process.Close();
+            //process.Dispose();
+            
+
+            //var gg = Process.GetProcessById(id);
+        }
+
         [TestMethod]
         public void Phase_02_SaveApiTokenBySqliteFile()
         {
@@ -27,7 +51,7 @@ namespace SharpTinderComplexTests
             var itemName = "TinderWeb/APIToken";
             var apiToken = result.Single(x => x.First() == itemName).Last();
             Console.WriteLine(apiToken);
-            configService.AddSetting("tinderApiToken", apiToken);
+            configService.OverrideSetting("tinderApiToken", apiToken);
 
             //var configFilePath = configService.SettingsDict["tinderApiTokenPath"].ToString();
             //yamlWorker.SerializeToFile(configFilePath, apiToken);
@@ -66,61 +90,64 @@ namespace SharpTinderComplexTests
         }
 
         [TestMethod]
-        public string Phase_04_GetProfileAndSave()
+        public void Phase_04_GetProfileAndSave()
         {
-            // arrange
-            configService.SettingsDict.ToList().ForEach(x => Console.WriteLine(x.Key + ": " + x.Value));
-            var httpRequester = new HttpRequester();
-            var apiToken = ReadApiTokenFromFile();
-            var organizationUri01 = "https://api.gotinder.com";
-            var projectNameOrId01 = "profile";
-
-            var headers = new Dictionary<string, string>
+            try
             {
-                { "app_version", "6.9.4" },
-                { "platform", "ios" },
-                { "User-agent", "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)" },
-                { "X-Auth-Token", apiToken }
-            };
+                // arrange
+                var httpRequester = new HttpRequester();
+                var apiToken = ReadApiTokenFromSettings();
+                var organizationUri01 = "https://api.gotinder.com";
+                var projectNameOrId01 = "profile";
 
-            // arrange2
-            var repoName = configService.SettingsDict["winderRepoName"].ToString();
-            var repo = (repoName, "");
-            var repoItem = repoService.Methods.GetItem(repo);
-            var newAddress = repoService.Methods.CreateFolder(repo, "tinder");
-            var newAddress2 = repoService.Methods.CreateFolder(newAddress, "exportedApiData");
+                var headers = new Dictionary<string, string>
+                {
+                    { "app_version", "6.9.4" },
+                    { "platform", "ios" },
+                    { "User-agent", "Tinder/7.5.3 (iPhone; iOS 10.3.2; Scale/2.00)" },
+                    { "X-Auth-Token", apiToken }
+                };
 
-            // act
-            var jsonBodyObj01 = httpRequester.InvokeGet(
-                organizationUri01,
-                projectNameOrId01,
-                default,
-                headers);
+                // act
+                var jsonBodyObj01 = httpRequester.InvokeGet(
+                    organizationUri01,
+                    projectNameOrId01,
+                    default,
+                    headers);
 
-            // save
-            var profileJson = jsonBodyObj01.ToString();
-            var profile = JsonConvert.DeserializeObject<Profile>(profileJson);
-            var newAddress3 = CreateAccountAddress(newAddress2,
-                profile.create_date,
-                profile.name,
-                profile._id);
+                // save
+                var profileJson = jsonBodyObj01.ToString();
+                var profile = JsonConvert.DeserializeObject<Profile>(profileJson);
 
-            var yamlProfile = yamlWorker.Serialize(profile);
-            repoService.Methods.CreateText(newAddress3, "profile", yamlProfile);
-            return profile._id;
+                var accountName = GetAccountName(
+                    profile.create_date,
+                    profile.name,
+                    profile._id);
+
+                var accountAddress = CreateAccountAddress(accountName, profile._id);
+                var yamlProfile = yamlWorker.Serialize(profile);
+                repoService.Methods.CreateText(accountAddress, FolderNames.Profile, yamlProfile);
+
+                var accountItem = repoService.GetItem(accountAddress);
+                AccountItem = accountItem;
+                AccountItem.Config.Add(SettingNames.WinderAccountId, profile._id);
+
+            }
+            catch
+            {
+            }
         }
 
         [TestMethod]
         public void Phase_05_GetMatchesAndSave()
         {
             // arrange
-            var accoutId = Phase_04_GetProfileAndSave();
-            var accountAddress = GetAccountAddress(accoutId);
+            var accountAddress = AccountItem.AdrTuple;
             var httpRequester = new HttpRequester();
-            var apiToken = ReadApiTokenFromFile();
+            var apiToken = ReadApiTokenFromSettings();
             var organizationUri = "https://api.gotinder.com";
             var projectNameOrId = "updates";
-            var repo = configService.SettingsDict["winderRepoName"].ToString();
+            var repo = configService.SettingsDict[SettingNames.WinderRepoName].ToString();
 
             var headers = new Dictionary<string, string>
             {
@@ -153,6 +180,9 @@ namespace SharpTinderComplexTests
             {
                 //var accoutAddress = TryGetAccountId(matchesList.First());
                 var nameQContentList = matchesList.Select(x => (x.id, yamlWorker.Serialize(x))).ToList();
+
+                var gg = nameQContentList.Where(x => x.id.Contains("651ae829e0d5d201007d6767")).ToList();
+
                 repoService.Methods.CreateManyText(accountAddress, nameQContentList);
             }
         }
@@ -217,26 +247,35 @@ namespace SharpTinderComplexTests
         [TestMethod]
         public void Phase_08c_ExportLastAccountAsText()
         {
-            // arrange
             var appData = configService.SettingsDict["winderRepoName"].ToString();
             var mainAddress = (appData, "");
-            var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, Names.MainFolderName);
+            var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, FolderNames.Winder);
             var addressIn = repoService.Methods.GetPathsByName(
                 mainAddress2, new List<string> { "exportedApiData" });
-            var addressOut = repoService.Methods.CreateFolder(mainAddress2, Names.ConversationsAsText);
             var accountNamesList = repoService.Methods.GetAllFoldersNames(addressIn);
             accountNamesList.Sort();
             var lastAccount = accountNamesList.Last(); // accountNamesList.Last();
-            ExportConversationAsText(lastAccount, addressIn, addressOut);
+
+            // arrange
+            Phase_xx_ExportAccountAsText();
+        }
+
+        [TestMethod]
+        public void Phase_xx_ExportAccountAsText()
+        {
+            // arrange
+            //var accountId = AccountItem.Config[SettingNames.WinderAccountId].ToString();
+            var accountName = AccountItem.Name;
+            ExportConversationAsText(accountName, ApiDataItem.AdrTuple, TextConversationsItem.AdrTuple);
         }
 
         public void ExportConversationAsText(
             string accountName,
-            (string, string) addressIn,
-            (string, string) addressOut)
+            (string, string) apiDataAdrTuple,
+            (string, string) textConverstionsAdrTuple)
         {
             var contentsList = repoService.Methods.GetManyItemByName(
-                addressIn, new List<string> { accountName });
+                apiDataAdrTuple, new List<string> { accountName });
             contentsList.RemoveAt(0);
             var matchesDictionaries = contentsList.Select(x => yamlWorker.Deserialize<Dictionary<object, object>>(x))
             .ToList();
@@ -246,7 +285,7 @@ namespace SharpTinderComplexTests
             var conversationList = convOperations.Worker01.GetAllConversationForTextFile(matchesDictionaries, myAccoutId);
             var conversationString = string.Join("\n", conversationList);
             var convName = convOperations.Worker01.GetConvName(matchesDictionaries[0]);
-            repoService.Methods.CreateText(addressOut, accountName, conversationString);
+            repoService.Methods.CreateText(textConverstionsAdrTuple, accountName, conversationString);
         }
 
         [TestMethod]

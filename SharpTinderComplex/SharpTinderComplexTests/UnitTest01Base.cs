@@ -3,6 +3,7 @@ using SharpConfigProg.Service;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
 using SharpTinderComplexTests.Repetition;
+using SharpTinderComplexTests.Repetition.RepoService;
 using Unity;
 using OutBorder01 = SharpFileServiceProg.Repetition.OutBorder;
 using OutBorder02 = SharpConfigProg.Repetition.OutBorder;
@@ -19,6 +20,8 @@ namespace SharpTinderComplexTests
         protected readonly string configFilePath;
         protected Dictionary<string, object> ConfigData { get; private set; }
 
+        
+
         protected UnitTest01Base()
         {
             fileService = MyBorder.Container.Resolve<IFileService>();
@@ -26,15 +29,9 @@ namespace SharpTinderComplexTests
             configFilePath = configService.ConfigFilePath;
             yamlWorker = fileService.Yaml.Custom03;
             repoService = MyBorder.Container.Resolve<IRepoService>();
+
         }
 
-        protected void CreateWorkspace(string path)
-        {
-            var pathsList = new List<string>() { path };
-            var xmlWorker = new XmlWorker(fileService);
-            var path2 = path + "/" + "workspace.txt";
-            xmlWorker.Load(path2);
-            //xmlDocument.Save();
-        }
+        
     }
 }

@@ -37,12 +37,14 @@ namespace SharpTinderComplexTests
 
             //(string googleClientId, string googleClientSecret) = credentials.GetCredentials(assemblyName, embeddedResourceFilePath);
 
-            var tinderSqlLitePath = "D:/03_synch/02_programs_portable/11_firefox/14_paweltinder_firefox/Data/profile/storage/default/https+++tinder.com/ls/data.sqlite";
-            var winderRepoName = "Winder";
+            var tinderBrowserPath = "D:/03_synch/02_programs_portable/11_firefox/14_paweltinder_firefox";
+            var tinderSqlLitePath = tinderBrowserPath + "/" + "/Data/profile/storage/default/https+++tinder.com/ls/data.sqlite";
+            var winderRepoName = "Winder2";
 
             var paths = new Dictionary<string, object>()
             {
                 { nameof(repoRootPaths), repoRootPaths },
+                { nameof(tinderBrowserPath), tinderBrowserPath },
                 { nameof(tinderSqlLitePath), tinderSqlLitePath },
                 { nameof(winderRepoName), winderRepoName },
                 
