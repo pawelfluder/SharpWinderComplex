@@ -5,21 +5,13 @@ VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTinderGoogleDocsTests", "..\SharpTinderGoogleDocsTests\SharpTinderGoogleDocsTests.csproj", "{B20BB273-04E2-43EA-AC4B-DD82F5351EE0}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDocsProg", "..\..\..\03_projects\SharpGoogleDocs\SharpGoogleDocsProg\SharpGoogleDocsProg.csproj", "{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDocsProg", "..\..\..\17_projects\03_projects\SharpGoogleDocs\SharpGoogleDocsProg\SharpGoogleDocsProg.csproj", "{5682EC69-7E21-46F8-BE44-9C9ED0A6DE3C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTinderGoogleDocsProg", "SharpTinderGoogleDocsProg.csproj", "{1E6929DB-3FFD-4C45-BC4E-32BB364F4FD7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDriveProg", "..\..\..\03_projects\SharpGoogleDrive\SharpGoogleDriveProg\SharpGoogleDriveProg.csproj", "{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDriveProg", "..\..\..\17_projects\03_projects\SharpGoogleDrive\SharpGoogleDriveProg\SharpGoogleDriveProg.csproj", "{A11E7A7B-E259-4D37-A6D5-C5A6BCE41595}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpFileServiceProg", "..\..\..\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj", "{4A38235E-DF30-488D-ACD2-6ACB491D03B3}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpSetupProg24Private", "..\..\SharpSetup24\SharpSetupProg24Private\SharpSetupProg24Private.csproj", "{60A3B524-3ADE-42F7-A350-0A4BC7E11936}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpContainerProg", "..\..\..\03_projects\SharpContainer\SharpContainerProg\SharpContainerProg.csproj", "{FD13698D-F8C8-48FE-861B-30AE5202F010}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpConfigProg", "..\..\..\03_projects\SharpConfig\SharpConfigProg\SharpConfigProg.csproj", "{B44AFBE8-B01F-4266-8DBF-C872542B9FEA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpRepoServiceProg", "..\..\..\03_projects\SharpRepoService\SharpRepoServiceProg\SharpRepoServiceProg.csproj", "{39B78FF7-E8AF-4750-B696-89CD2EFA8EB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,22 +39,6 @@ Global
 		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4A38235E-DF30-488D-ACD2-6ACB491D03B3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{60A3B524-3ADE-42F7-A350-0A4BC7E11936}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{60A3B524-3ADE-42F7-A350-0A4BC7E11936}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{60A3B524-3ADE-42F7-A350-0A4BC7E11936}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{60A3B524-3ADE-42F7-A350-0A4BC7E11936}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FD13698D-F8C8-48FE-861B-30AE5202F010}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FD13698D-F8C8-48FE-861B-30AE5202F010}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FD13698D-F8C8-48FE-861B-30AE5202F010}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FD13698D-F8C8-48FE-861B-30AE5202F010}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B44AFBE8-B01F-4266-8DBF-C872542B9FEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B44AFBE8-B01F-4266-8DBF-C872542B9FEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B44AFBE8-B01F-4266-8DBF-C872542B9FEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B44AFBE8-B01F-4266-8DBF-C872542B9FEA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{39B78FF7-E8AF-4750-B696-89CD2EFA8EB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{39B78FF7-E8AF-4750-B696-89CD2EFA8EB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{39B78FF7-E8AF-4750-B696-89CD2EFA8EB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{39B78FF7-E8AF-4750-B696-89CD2EFA8EB5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

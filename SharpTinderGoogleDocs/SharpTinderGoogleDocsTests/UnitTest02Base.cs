@@ -7,7 +7,6 @@ using SharpTinderComplexTests.Repetition;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 using TinderImport.Repetition;
-using Unity;
 
 namespace SharpTinderGoogleDocsTests
 {
@@ -184,7 +183,7 @@ namespace SharpTinderGoogleDocsTests
         protected (string id, string name) CreateNewDocFile(string fileName)
         {
             var folder2023 = "13gY7OdaPCMwHQKmJZWZpcou7xtMrxNlg";
-            driveService.Initialize();
+            //driveService.Initialize();
             var result = driveService.Worker.CreateNewDocFile(folder2023, fileName);
             return result;
         }
