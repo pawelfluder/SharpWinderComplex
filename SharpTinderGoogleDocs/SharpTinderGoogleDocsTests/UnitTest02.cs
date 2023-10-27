@@ -1,7 +1,5 @@
-﻿using Google.Apis.Docs.v1;
-using Microsoft.CodeAnalysis.Text;
-using SharpConfigProg.Preparer;
-using SharpFileServiceProg.Operations.Dictionaries;
+﻿using SharpFileServiceProg.Operations.Dictionaries;
+using SharpTinderGoogleDocsTests.Repetition.Names;
 using TinderImport;
 
 namespace SharpTinderGoogleDocsTests
@@ -12,7 +10,7 @@ namespace SharpTinderGoogleDocsTests
         [TestMethod]
         public void Phase_01_PreparePaths()
         {
-            configService.Prepare(typeof(IPreparer.IWinder));
+            //configService.Prepare(typeof(IPreparer.IWinder));
         }
 
         // done
@@ -50,9 +48,9 @@ namespace SharpTinderGoogleDocsTests
             Console.WriteLine("Start test");
             (int Start, int Stop) herMessageRange = (start, stop);
             var tinderOperations = new TinderOperations(null);
-            var appDataRepoName = configService.SettingsDict["winderAppDataPath"].ToString();
+            var appDataRepoName = configService.SettingsDict[SettingNames.WinderRepoName].ToString();
             var address = repoService.Methods.GetPathsByName(
-                (appDataRepoName, ""), new List<string> { "tinder", "exportedApiData" });
+                (appDataRepoName, ""), new List<string> { FolderNames.Winder, FolderNames.ExportedApiData });
             var accountNamesList = repoService.Methods.GetAllFoldersNames(address);
             var accountName = accountNamesList.SingleOrDefault(x => x.EndsWith(myAccoutId));
             var contentsList = repoService.Methods.GetManyItemByName(

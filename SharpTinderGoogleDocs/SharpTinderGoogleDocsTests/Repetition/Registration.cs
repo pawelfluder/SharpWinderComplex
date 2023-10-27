@@ -1,31 +1,26 @@
-﻿using SharpConfigProg.Preparer;
-using SharpConfigProg.Service;
-using SharpFileServiceProg.Service;
-using SharpRepoServiceProg.Service;
-using Unity;
+﻿using SharpConfigProg.ConfigPreparer;
+using SharpContainerProg.Public;
 using OutBorder1 = SharpFileServiceProg.Repetition.OutBorder;
 using OutBorder2 = SharpConfigProg.Repetition.OutBorder;
 using OutBorder3 = SharpRepoServiceProg.Repetition.OutBorder;
 
-namespace SharpNotesMigrationTests.Repetition
+namespace SharpTinderGoogleDocsTests.Repetition
 {
     internal class Registration : RegistrationBase
     {
         protected override void Registrations()
         {
-            RegisterByFunc(OutBorder1.FileService);
+            var fileService = OutBorder1.FileService();
+            RegisterByFunc(() => fileService);
 
-            RegisterByFunc(
-                OutBorder2.ConfigService,
-                container.Resolve<IFileService>());
+            var configService = OutBorder2.ConfigService(fileService);
 
-            RegisterByFunc<IRepoService, IFileService>(OutBorder3.RepoService,
-                container.Resolve<IFileService>());
+            var repoService = OutBorder3.RepoService(fileService);
+            RegisterByFunc(() => repoService);
 
-            var configService = container.Resolve<IConfigService>();
-            configService.Prepare(typeof(IPreparer.IWinder));
-            container.Resolve<IRepoService>()
-                .Initialize(configService.GetRepoSearchPaths());
+            var preparer = container.Resolve<IPreparer>();
+            configService.Prepare(preparer);
+            repoService.Initialize(configService.GetRepoSearchPaths());
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using SharpConfigProg.Preparer;
-using SharpConfigProg.Service;
+﻿using SharpConfigProg.ConfigPreparer;
 
 namespace SharpTinderComplexTests
 {
@@ -9,7 +8,7 @@ namespace SharpTinderComplexTests
         [TestMethod]
         public void Phase_01_PreparePaths()
         {
-            configService.Prepare(typeof(IPreparer.IWinder));
+            //configService.Prepare(typeof(IPreparer.IWinder));
         }
     }
 }
