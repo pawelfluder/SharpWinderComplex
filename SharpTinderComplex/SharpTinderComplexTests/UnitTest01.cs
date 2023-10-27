@@ -24,10 +24,13 @@ namespace SharpTinderComplexTests
         [TestMethod]
         public void SaveTinderData()
         {
+            var max = 5; var i = 0;
             Phase_02_SaveApiTokenBySqliteFile();
             Phase_04_GetProfileAndSave();
-            if (string.IsNullOrEmpty(AccountItem.Address))
+            while (string.IsNullOrEmpty(AccountItem?.Address)
+                && i < max)
             {
+                i++;
                 Phase_01_OpenBrowserOnPage();
                 Phase_02_SaveApiTokenBySqliteFile();
                 Phase_04_GetProfileAndSave();

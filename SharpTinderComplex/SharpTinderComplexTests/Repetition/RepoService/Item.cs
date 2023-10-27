@@ -6,7 +6,7 @@
 
         public string Type { get; set; }
 
-        public string Body { get; set; }
+        public object Body { get; set; }
 
         public string Address { get; set; }
 

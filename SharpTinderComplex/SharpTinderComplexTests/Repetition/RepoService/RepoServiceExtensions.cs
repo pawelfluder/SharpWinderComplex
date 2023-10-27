@@ -10,8 +10,15 @@ namespace SharpTinderComplexTests.Repetition.RepoService
             (string, string) address)
         {
             var jsonItem = repoService.Methods.GetItem(address);
-            var item = JsonConvert.DeserializeObject<Item>(jsonItem);
-            return item;
+            try
+            {
+                var item = JsonConvert.DeserializeObject<Item>(jsonItem);
+                return item;
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

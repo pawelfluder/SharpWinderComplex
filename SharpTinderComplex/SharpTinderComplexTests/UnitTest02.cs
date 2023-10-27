@@ -6,32 +6,54 @@ using SharpSQLiteProj;
 using Microsoft.CodeAnalysis;
 using SharpTinderComplexTests.Repetition.RepoService;
 using SharpTinderComplexTests.Repetition.Names;
+using System.Runtime.InteropServices;
 
 namespace SharpTinderComplexTests
 {
     
     public class UnitTest02 : UnitTest02Base
     {
+        [DllImport("user32.dll")]
+        private static extern Boolean ShowWindow(IntPtr hWnd, Int32 nCmdShow);
+
         [TestMethod]
         public void Phase_01_OpenBrowserOnPage()
         {
             var browserPath = configService.SettingsDict["tinderBrowserPath"].ToString();
             var exePath = browserPath + "/" + "FirefoxPortable.exe";
             var url = "https://tinder.com";
-            var process = new Process();
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.FileName = exePath;
-            process.StartInfo.Arguments = url;
-            process.StartInfo.CreateNoWindow = true;
-            process.Start();
-            Thread.Sleep(10000);
-            var id = process.Id;
-            process.CloseMainWindow();
-            //process.Close();
-            //process.Dispose();
-            
+            var firefoxName = "firefox";
 
-            //var gg = Process.GetProcessById(id);
+            var process = new Process
+            {
+                StartInfo =
+                {
+                    FileName = exePath,
+                    Arguments = url,
+                    CreateNoWindow = true,
+                    ErrorDialog = false,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                }
+            };
+            process.Start();
+
+            Thread.Sleep(1* 1000);
+
+            Process[] remoteByName01 = Process.GetProcessesByName(firefoxName);
+            foreach (var item in remoteByName01)
+            {
+                //item.Close();
+                ShowWindow(item.MainWindowHandle, 0);
+            }
+
+            Thread.Sleep(12 * 1000);
+
+            Process[] remoteByName02 = Process.GetProcessesByName(firefoxName);
+            foreach (var item in remoteByName02)
+            {
+                //item.Close();
+                item.Kill();
+            }
         }
 
         [TestMethod]
@@ -131,7 +153,6 @@ namespace SharpTinderComplexTests
                 var accountItem = repoService.GetItem(accountAddress);
                 AccountItem = accountItem;
                 AccountItem.Config.Add(SettingNames.WinderAccountId, profile._id);
-
             }
             catch
             {
