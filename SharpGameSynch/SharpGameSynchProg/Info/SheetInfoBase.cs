@@ -1,9 +1,9 @@
-﻿using CommonTypesCoreProj.Objects;
+﻿using CSharpGameSynchProg.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CSharpSheetToObjProg.Info
+namespace CSharpGameSynchProg.Info
 {
     public class SheetInfoBase
     {

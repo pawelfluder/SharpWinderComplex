@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
 
-namespace CommonTypesCoreProj.Extensions
+namespace CSharpSheetToObjProg
 {
     public static class RepoServiceExtensions
     {
@@ -17,9 +17,9 @@ namespace CommonTypesCoreProj.Extensions
             return adrTuple;
         }
 
-            public static T GetItem<T>(
-            this IRepoService repoService,
-            (string Repo, string Loca) adrTuple)
+        public static T GetItem<T>(
+        this IRepoService repoService,
+        (string Repo, string Loca) adrTuple)
         {
             var jsonObj = repoService.Methods.GetItem(adrTuple);
             var item = JsonConvert.DeserializeObject<T>(jsonObj);

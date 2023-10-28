@@ -1,10 +1,11 @@
-﻿using CommonTypesCoreProj.Interfaces;
+﻿using CSharpGameSynchProg.Contracts;
+using CSharpGameSynchProg.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace CommonTypesCoreProj.Contracts
 {
-   public abstract class CommonIdObject : CommonObject, IHasIdProp
+    public abstract class CommonIdObject : CommonObject, IHasIdProp
    {
       public abstract string Id { get; set; }
 

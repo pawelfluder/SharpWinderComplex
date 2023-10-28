@@ -3,8 +3,7 @@ using System.Text;
 using GameStatisticsCoreProj.Counters;
 using CSharpSheetToObjProg.Repet;
 using SharpRepoServiceProg.Service;
-using CSharpSheetToObjProg.Info;
-using CommonTypesCoreProj.Extensions;
+using CSharpSheetToObjProg;
 
 namespace GameStatisticsCoreProj
 {
@@ -87,12 +86,12 @@ namespace GameStatisticsCoreProj
             return stringBuilder.ToString();
         }
 
-        private int GetTwoDigitsYearFromInfo(SheetInfoBase info)
-        {
-            var twoLastChar = info.Year.Substring(2, 2);
-            int year = int.Parse(twoLastChar);
-            return year;
-        }
+        //private int GetTwoDigitsYearFromInfo(SheetInfoBase info)
+        //{
+        //    var twoLastChar = info.Year.Substring(2, 2);
+        //    int year = int.Parse(twoLastChar);
+        //    return year;
+        //}
 
         private string PrepareNumberString((int, string) item)
         {

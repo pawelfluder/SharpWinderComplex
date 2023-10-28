@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace CSharpSheetToObjProg.Info
+namespace CSharpGameSynchProg.Info
 {
     public class SheetData
     {

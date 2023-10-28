@@ -2,7 +2,7 @@
 using SharpContainerProg.Public;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
-using Registration01 = SharpSetupProg21Private.Repetition.Registration;
+using Registration01 = SharpSetupProg21Private.APublic.Registration;
 
 namespace CSharpSheetToObjProg.Repet
 {

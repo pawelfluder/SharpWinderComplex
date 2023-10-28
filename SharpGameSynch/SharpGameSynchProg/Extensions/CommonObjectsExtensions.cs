@@ -1,9 +1,10 @@
 ﻿using CommonTypesCoreProj.Contracts;
+using CSharpGameSynchProg.Contracts;
 using System.Collections.Generic;
 using System.Linq;
-using static CommonTypesCoreProj.Extensions.CommonObjectsExtensions;
+using static CSharpGameSynchProg.Extensions.CommonObjectsExtensions;
 
-namespace CommonTypesCoreProj.Extensions
+namespace CSharpGameSynchProg.Extensions
 {
     public static class CommonIdObjectListExtensions
     {

@@ -1,4 +1,4 @@
-﻿namespace CSharpSheetToObjProg.Info
+﻿namespace CSharpGameSynchProg.Info
 {
     public class SheetInfo2020 : SheetInfoBase
     {
