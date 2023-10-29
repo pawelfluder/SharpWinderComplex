@@ -11,6 +11,8 @@ using CSharpGameSynchProg.Register;
 using SharpGoogleDriveProg.AAPublic;
 using SharpGoogleSheetProg.AAPublic;
 using SharpFileServiceProg.Service;
+using SharpRepoServiceProg.Service;
+using SharpSetupProg21Private.AAPublic.Extensions;
 
 namespace GameSynchCoreProj
 {
@@ -24,6 +26,7 @@ namespace GameSynchCoreProj
         private MessagesWorker messagesWorker;
         private static Serializer yamlSerializerSharp = new Serializer();
         private readonly IFileService fileService;
+        private readonly IRepoService repoService;
 
         public SychService(SheetInfoBase info)
         {
@@ -32,6 +35,7 @@ namespace GameSynchCoreProj
             googleDriveService = MyBorder.Container.Resolve<IGoogleDriveService>();
             googleSheetService = MyBorder.Container.Resolve<IGoogleSheetService>();
             fileService = MyBorder.Container.Resolve<IFileService>();
+            repoService = MyBorder.Container.Resolve<IRepoService>();
 
             var startPath = info.LocalStartPath;
             var searchPlace = info.PersistencyFolder;
@@ -110,6 +114,11 @@ namespace GameSynchCoreProj
             {
                 excelSheetData = excelSheetData.OrderByDateProperty();
             }
+
+            var mainAdrTuple = ("Persistency", "03");
+
+            var approachesAdrTuple = repoService
+                .GetAdrTuple<Approaches>(mainAdrTuple);
 
             //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes);
 
@@ -212,36 +221,40 @@ namespace GameSynchCoreProj
             if (!AllPropertiesAreNotNull(excelSheetData.First())) { excelSheetData = excelSheetData.Skip(1).ToList(); }
 
             var orderedExcelSheetData = excelSheetData.OrderByDateProperty().ToList();
-            //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes);
 
-            //if (IsDataCorrupted(excelSheetData, persistedData))
-            //{
-            //    return;
-            //}
+            var mainAdrTuple = ("Persistency", "03");
 
-            //var (mergedData, changesInfo)  = JoinData(excelSheetData, persistedData);
+            var persistedData = repoService.GetItemList<T>();
 
-            //if (changesInfo.CountOfRemovedData > 0 ||
-            //    changesInfo.CountOfNewData > 0 ||
-            //    changesInfo.CountOfChangedData > 0 &&
-            //    changesInfo.CountOfChangedData <= 1)
-            //{
-            //    //string yamlResult = persistency.Serialize(mergedData);
-            //    CheckDistinctIds(mergedData.Select(x => (IHasIdProp)x));
-            //    //persistency.SaveData(sheetData.PersistedIndexes, mergedData);
-            //    var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
 
-            //    var headerNames = GetPropertyNames(typeof(T));
-            //    var sheetToUpdate = info.GetSheetData(typeof(T));
-            //    var formulas = GetFormulas(typeof(T));
+            if (IsDataCorrupted(excelSheetData, persistedData))
+            {
+                return;
+            }
 
-                //googleSheetService.PasteDataAndFunctionsToSheet(
-                   //sheetToUpdate.SpreadSheetId,
-                   //sheetToUpdate.SheetId,
-                   //dataToSave,
-                   //headerNames,
-                   //formulas);
-            //}
+            var (mergedData, changesInfo) = JoinData(excelSheetData, persistedData);
+
+            if (changesInfo.CountOfRemovedData > 0 ||
+                changesInfo.CountOfNewData > 0 ||
+                changesInfo.CountOfChangedData > 0 &&
+                changesInfo.CountOfChangedData <= 1)
+            {
+                //string yamlResult = persistency.Serialize(mergedData);
+                CheckDistinctIds(mergedData.Select(x => (IHasIdProp)x));
+                //persistency.SaveData(sheetData.PersistedIndexes, mergedData);
+                var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
+
+                var headerNames = GetPropertyNames(typeof(T));
+                var sheetToUpdate = info.GetSheetData(typeof(T));
+                //var formulas = GetFormulas(typeof(T));
+
+                //googleSheetService.Worker.PasteDataAndFunctionsToSheet(
+                //sheetToUpdate.SpreadSheetId,
+                //sheetToUpdate.SheetId,
+                //dataToSave,
+                //headerNames,
+                //formulas);
+            }
         }
 
         public bool ListDataNotCorrupted(IEnumerable<IHasIdProp> objList)
@@ -400,7 +413,6 @@ namespace GameSynchCoreProj
             var result = fileService.Yaml.Custom03.Deserialize<List<T>>(yamlText);
 
             return result;
-            //return sheetListOfDictionaries;
         }
 
         private void NamedApproachesToOtherSheets<T>(SheetInfoBase info) where T : CommonIdObject

@@ -1,4 +1,4 @@
-﻿using SharpContainerProg.Public;
+﻿using SharpContainerProg.AAPublic;
 
 namespace CSharpGameSynchProg.Register
 {

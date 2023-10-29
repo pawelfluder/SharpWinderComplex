@@ -1,7 +1,7 @@
 ﻿using SharpContainerProg.AAPublic;
 using Registration01 = SharpSetupProg21Private.AAPublic.Registration;
 
-namespace CSharpGameSynchProg.Register
+namespace CSharpSheetToObjProg.Register
 {
     internal class Registration : RegistrationBase
     {

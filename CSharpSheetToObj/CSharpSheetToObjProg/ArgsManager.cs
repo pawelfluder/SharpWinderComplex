@@ -1,4 +1,4 @@
-﻿using CSharpSheetToObjProg.Repet;
+﻿using CSharpSheetToObjProg.Register;
 using SharpRepoServiceProg.Service;
 
 namespace GameStatisticsCoreProj
@@ -41,7 +41,8 @@ namespace GameStatisticsCoreProj
         }
 
         private string ResolveForYear(
-            (string Repo, string Loca) adrTuple, string year)
+            (string Repo, string Loca) adrTuple,
+            string year)
         {
             Console.WriteLine("Year: " + year);
             if (year.Count() != 4)
