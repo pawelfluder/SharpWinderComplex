@@ -1,7 +1,4 @@
 ﻿using GameStatisticsCoreProj;
-using System;
-using System.Diagnostics;
-using System.IO;
 
 namespace GoogleApiV4CoreApp
 {

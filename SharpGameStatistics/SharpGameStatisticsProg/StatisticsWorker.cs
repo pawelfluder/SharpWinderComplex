@@ -51,6 +51,9 @@ namespace GameStatisticsCoreProj
         public List<(int, string)> GetStatistics(
             (string Repo, string Loca) mainAdrTuple)
         {
+            //var approachesAdrTuple = repoService
+            //    .GetItemList<Approaches>();
+
             var approachesAdrTuple = repoService
                 .GetAdrTuple<Approaches>(mainAdrTuple);
             var rejectionsAdrTuple = repoService

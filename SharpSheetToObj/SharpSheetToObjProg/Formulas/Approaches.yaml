@@ -1,0 +1,16 @@
+﻿# NotesSystem - 0fc7da8d-3466-4964-a24c-dfc0d0fef87c/Notki/12/23/03
+# Programowanie; Excel; Łączenie z uderscorem zamiast spacji
+
+Who1: =B{0}&IF(AND(B{0}<>"";C{0}<>"");"_";"")&C{0}
+# B; Date
+# C; Type
+
+Who2: =IF(D{0}="x";"";D{0})&IF(OR(AND(D{0}<>"x";E{0}<>"x");AND(D{0}<>"x";F{0}<>"x"));"_";"")&IF(E{0}="x";"";E{0})&IF(AND(E{0}<>"x";F{0}<>"x");"_";"")&IF(F{0}="x";"";F{0})
+#
+#
+
+FileName: =G{0}&IF(AND(G{0}<>"";H{0}<>"");"_";"")&H{0}
+#         =H{0}&IF(AND(H{0}<>"";G{0}<>"");"_";"")&G{0}
+#         =H{0}&IF(AND(H{0}<>"";I{0}<>"");"_";"")&I{0}
+#
+#
