@@ -75,22 +75,14 @@ namespace GameSynchCoreProj
             }
         }
 
-        public void SyncSheet(string option)
+        public void SyncSheet<T>(params string[] names) where T : class
         {
             var hasId = true;
             if (hasId)
             {
-                SynchIdObjects<CryptoTransactions>();
+                SynchIdDataObjects<T>(names);
                 return;
             }
-
-            //SynchObjects()
-
-
-            //NamedApproachesToOtherSheets<Approaches>(info);
-
-            //var messages = GetAllMessages();
-            //UpdateMessages(messages);
         }
 
         private void PrintInfo(string from, string to)
@@ -129,131 +121,140 @@ namespace GameSynchCoreProj
             }
         }
 
-        private (List<T> mergedData, JoinDataCount changesInfo) JoinData<T>(
-            List<T> excelSheetData,
-            List<T> persistedData)
-            where T : class
+        private (IEnumerable<PkdObj<T, HasIdDate>> mergedData, JoinDataCount changesInfo) MergeData<T>(
+            IEnumerable<PkdObj<T, HasIdDate>> sheetData,
+            IEnumerable<PkdObj<T, HasIdDate>> persistedData) where T : class
         {
-            CheckDistinctIds(excelSheetData.Select(x => (IHasId)x));
-            CheckDistinctIds(persistedData.Select(x => (IHasId)x));
+            CheckDistinctIds(sheetData.Select(x => (IHasId)x.Target));
+            CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
 
+            var removedData = persistedData
+                .Where(x1 => !(sheetData.Select(x2 => x2.Target)
+                .Any(y => y.Id == x1.Target.Id)));
             //var removedData = persistedData.Where(x => !excelSheetData.Any(y => y.Id == x.Id));
 
-            //var newData = excelSheetData.Where(x => !persistedData.Any(y => y.Id == x.Id));
+            var newData = sheetData
+                .Where(x => !(persistedData.Select(x2 => x2.Target)
+                .Any(y => y.Id == x.Target.Id)));
 
             //var changes = GetChanges(persistedData, excelSheetData);
+            var changes = GetChanges(persistedData, sheetData);
 
-            //var changed = changes.Where(x => x.Item1 == true).ToList();
-            //var existedSheetData = changes.Select(x => x.Item2);
-            //var allDataToSave = new List<T>(removedData.Concat(existedSheetData).Concat(newData));//.OrderByDescending(x => x.Date).ToList();
+            var changed = changes.Where(x => x.Item1 == true).ToList();
+            var existedSheetData = changes.Select(x => x.Item2);
+            var allDataToSave = new List<PkdObj<T, HasIdDate>>(removedData.Concat(existedSheetData).Concat(newData));//.OrderByDescending(x => x.Date).ToList();
             //var orderedDataToSave = allDataToSave.OrderByDateProperty();
 
-            //var dataCount = new JoinDataCount(
-            //   persistedData.Count(),
-            //   excelSheetData.Count(),
-            //   removedData.Count(),
-            //   newData.Count(),
-            //   changes.Count(x => x.Item1 == false),
-            //   changes.Count(x => x.Item1 == true),
-            //   existedSheetData.Count(),
-            //   orderedDataToSave.Count());
+            var dataCount = new JoinDataCount(
+               persistedData.Count(),
+               sheetData.Count(),
+               removedData.Count(),
+               newData.Count(),
+               changes.Count(x => x.Item1 == false),
+               changes.Count(x => x.Item1 == true),
+               existedSheetData.Count(),
+               allDataToSave.Count());
+               //orderedDataToSave.Count());
 
-            //return (orderedDataToSave, dataCount);
-            return default;
+            return (allDataToSave, dataCount);
         }
 
-        private bool IsDataCorrupted<T>(List<T> excelSheetData, List<T> persistedData) where T : CommonObject
+        private bool IsDataCorrupted<T>(
+            IEnumerable<PkdObj<T, HasIdDate>> sheetData,
+            IEnumerable<PkdObj<T, HasIdDate>> persistedData) where T: class
         {
             var genericType = typeof(T);
             var gg = typeof(T).GetInterfaces();
             var baseType = typeof(T).BaseType.Name;
 
-            var type2 = typeof(CommonIdObject).Name;
-            var type1 = typeof(CommonObject).Name;
+            //var type2 = typeof(CommonIdObject).Name;
+            //var type1 = typeof(CommonObject).Name;
 
-            if (baseType == type2)
-            {
-                var temp1 = excelSheetData.Select(x => (CommonObject)x).ToList();
-                var temp2 = persistedData.Select(x => (CommonObject)x).ToList();
+            //if (baseType == type2)
+            //{
+            //    var temp1 = sheetData.Select(x => (CommonObject)x).ToList();
+            //    var temp2 = persistedData.Select(x => (CommonObject)x).ToList();
 
-                if (CommonObject.IsDataListCorrupted(temp1))
-                {
-                    return true;
-                }
+            //    if (CommonObject.IsDataListCorrupted(temp1))
+            //    {
+            //        return true;
+            //    }
 
-                if (CommonObject.IsDataListCorrupted(temp2))
-                {
-                    return true;
-                }
+            //    if (CommonObject.IsDataListCorrupted(temp2))
+            //    {
+            //        return true;
+            //    }
 
-                return false;
-            }
+            //    return false;
+            //}
 
-            if (baseType == type1)
-            {
-                var temp1 = excelSheetData.Select(x => (CommonObject)x).ToList();
-                var temp2 = persistedData.Select(x => (CommonObject)x).ToList();
-                if (CommonObject.IsDataListCorrupted(temp1))
-                {
-                    return true;
-                }
-                if (CommonObject.IsDataListCorrupted(temp2))
-                {
-                    return true;
-                }
+            //if (baseType == type1)
+            //{
+            //    var temp1 = sheetData.Select(x => (CommonObject)x).ToList();
+            //    var temp2 = persistedData.Select(x => (CommonObject)x).ToList();
+            //    if (CommonObject.IsDataListCorrupted(temp1))
+            //    {
+            //        return true;
+            //    }
+            //    if (CommonObject.IsDataListCorrupted(temp2))
+            //    {
+            //        return true;
+            //    }
 
-                return false;
-            }
+            //    return false;
+            //}
 
-            throw new Exception();
+            //throw new Exception();
+
+            return false;
         }
 
-        private void SynchIdObjects<T>() where T : class
+        private void SynchIdDataObjects<T>(params string[] names) where T : class
         {
+            var year = names[0]; // "2022";
             var sheetData = info.GetSheetData(typeof(T));
             PrintInfo("Sheet; " + sheetData.FileName + "; " + sheetData.CopySheetTabName, "File; " + sheetData.PersistencyName);
-            List<T> excelSheetData2 = GetExcelSheetData<T>(sheetData);
+            List<T> excelSheetData = GetExcelSheetData<T>(sheetData);
 
-            var excelSheetData = CastList<IHasIdDate>(excelSheetData2);
+            var objectPacker = new ObjectPacker();
+            var pkdSheetData = objectPacker.Pack<T, HasIdDate>(excelSheetData);
 
-            var gg = ListDataNotCorrupted(excelSheetData);
-            if (!AllPropertiesAreNotNull(excelSheetData.First())) { excelSheetData = excelSheetData.Skip(1).ToList(); }
+            var gg = AllDataChecks(pkdSheetData);
+            if (!AllPropertiesAreNotNull(pkdSheetData.First())) { pkdSheetData = pkdSheetData.Skip(1).ToList(); }
 
+            var pkdOrderedSheetData = pkdSheetData.OrderByDateProperty().ToList();
             
+            var persistedData = repoService.GetItemList<T>(year);
+            var pkdPersistedData = objectPacker.Pack<T, HasIdDate>(persistedData);
 
-            var orderedExcelSheetData = excelSheetData.OrderByDateProperty().ToList();
-            //var year = "2022";
-            //var persistedData = repoService.GetItemList<T>(year);
+            if (IsDataCorrupted(pkdOrderedSheetData, pkdPersistedData))
+            {
+                return;
+            }
 
+            var (mergedData, changesInfo) = MergeData(pkdOrderedSheetData, pkdPersistedData);
 
-            //if (IsDataCorrupted(excelSheetData, persistedData))
-            //{
-            //    return;
-            //}
+            if (changesInfo.CountOfRemovedData > 0 ||
+                changesInfo.CountOfNewData > 0 ||
+                changesInfo.CountOfChangedData > 0 &&
+                changesInfo.CountOfChangedData <= 1)
+            {
+                
+                CheckDistinctIds(mergedData.Select(x => x.Target));
+                var yamlResult = repoService.SaveItemList<T>(mergedData.Select(x => x.Source), year);
+                //var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
 
-            //var (mergedData, changesInfo) = JoinData(excelSheetData, persistedData);
+                var headerNames = GetPropertyNames(typeof(T));
+                var sheetToUpdate = info.GetSheetData(typeof(T));
+                var formulas = GetFormulas(typeof(T));
 
-            //if (changesInfo.CountOfRemovedData > 0 ||
-            //    changesInfo.CountOfNewData > 0 ||
-            //    changesInfo.CountOfChangedData > 0 &&
-            //    changesInfo.CountOfChangedData <= 1)
-            //{
-            //    //string yamlResult = persistency.Serialize(mergedData);
-            //    CheckDistinctIds(mergedData.Select(x => (IHasIdProp)x));
-            //    //persistency.SaveData(sheetData.PersistedIndexes, mergedData);
-            //    var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
-
-            //    var headerNames = GetPropertyNames(typeof(T));
-            //    var sheetToUpdate = info.GetSheetData(typeof(T));
-            //    //var formulas = GetFormulas(typeof(T));
-
-            //    //googleSheetService.Worker.PasteDataAndFunctionsToSheet(
-            //    //sheetToUpdate.SpreadSheetId,
-            //    //sheetToUpdate.SheetId,
-            //    //dataToSave,
-            //    //headerNames,
-            //    //formulas);
-            //}
+                googleSheetService.Worker.PasteDataAndFunctionsToSheet(
+                sheetToUpdate.SpreadSheetId,
+                sheetToUpdate.SheetId,
+                dataToSave,
+                headerNames,
+                formulas);
+            }
         }
 
         public List<T> CastList<T>(IEnumerable<object> theList)
@@ -278,13 +279,12 @@ namespace GameSynchCoreProj
 
         public void CastAndAdd<T>(object objThatImplementsMyInterface, IList<T> theList)
         {
-            var cast = (T)objThatImplementsMyInterface;
-            theList.Add();
+            theList.Add((T)objThatImplementsMyInterface);
         }
 
-        public bool ListDataNotCorrupted(IEnumerable<IHasId> objList)
+        public bool AllDataChecks<T>(IEnumerable<PkdObj<T, HasIdDate>> objList) where T : class
         {
-            var distictIds = CheckDistinctIds(objList);
+            var distictIds = CheckDistinctIds(objList.Select(x => (IHasId)x.Target));
             var allPropertiesAreNotNull = AllPropertiesAreNotNull(objList);
 
             var dataNotCorrupted = distictIds & allPropertiesAreNotNull;
@@ -388,23 +388,25 @@ namespace GameSynchCoreProj
             return string.Empty;
         }
 
-        private List<(bool, T)> GetChanges<T>(List<T> persistedData, List<T> excelSheetData) where T : CommonIdObject
+        private IEnumerable<(bool, PkdObj<T, HasIdDate>)> GetChanges<T>(
+            IEnumerable<PkdObj<T, HasIdDate>> persistedData,
+            IEnumerable<PkdObj<T, HasIdDate>> excelSheetData) where T : class
         {
-            var result = new List<(bool, T)>();
+            var result = new List<(bool, PkdObj<T, HasIdDate>)>();
 
-            var existedData = excelSheetData.Where(x => persistedData.Any(y => y.Id == x.Id));
-            var persistedIds = persistedData.Select(x => x.Id).OrderBy(x => x);
-            var excelIds = excelSheetData.Select(x => x.Id).OrderBy(x => x);
+            var existedData = excelSheetData.Where(x => persistedData.Any(y => y.Target.Id == x.Target.Id));
+            var persistedIds = persistedData.Select(x => x.Target.Id).OrderBy(x => x);
+            var excelIds = excelSheetData.Select(x => x.Target.Id).OrderBy(x => x);
 
             var persistedIdsDuplicated = persistedIds.Where(x => persistedIds.Count(y => y == x) > 1);
             var excelIdsDuplicated = excelIds.Where(x => excelIds.Count(y => y == x) > 1);
 
-            foreach (var item in existedData)
+            foreach (var sheetItem in existedData)
             {
-                T persisted = null;
+                PkdObj<T, HasIdDate> persistedItem = null;
                 try
                 {
-                    persisted = persistedData.Single(x => x.Id == item.Id);
+                    persistedItem = persistedData.Single(x => x.Target.Id == sheetItem.Target.Id);
                 }
                 catch (Exception ex)
                 {
@@ -415,13 +417,14 @@ namespace GameSynchCoreProj
                     //throw ex;
                 }
 
-                if (persisted.Equals(item))
+                if (persistedItem == null ||
+                    !persistedItem.Equals(sheetItem))
                 {
-                    result.Add((false, item));
+                    result.Add((true, sheetItem));
                 }
                 else
                 {
-                    result.Add((true, item));
+                    result.Add((false, sheetItem));
                 }
             }
 

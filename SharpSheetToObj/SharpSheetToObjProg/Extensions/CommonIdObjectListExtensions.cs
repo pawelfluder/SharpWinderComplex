@@ -1,5 +1,6 @@
 ﻿using CommonTypesCoreProj.Contracts;
 using CSharpGameSynchProg.Contracts;
+using SharpSheetToObjProg;
 using SharpSheetToObjProg.HasProperty;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,18 +15,26 @@ namespace CSharpGameSynchProg.Extensions
             return null;
         }
 
-        public static List<T> OrderByDateProperty<T>(this List<T> inputList) where T : IHasDate
+        public static IOrderedEnumerable<PkdObj<T, HasIdDate>> OrderByDateProperty<T>(
+            this List<PkdObj<T, HasIdDate>> inputList) where T : class
         {
-            var result = inputList.OrderByDescending(num => num, new SpecialComparer()).ToList();
+            var result = inputList.OrderByDescending(num => num, new SpecialComparer<T>());
             return result;
         }
 
-        public class SpecialComparer : IComparer<IHasDate>
+        public static IEnumerable<PkdObj<T, HasIdDate>> OrderByDateProperty<T>(
+            this IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
         {
-            public int Compare(IHasDate d1, IHasDate d2)
+            var result = inputList.OrderByDescending(num => num, new SpecialComparer<T>());
+            return result;
+        }
+
+        public class SpecialComparer<T> : IComparer<PkdObj<T, HasIdDate>> where T : class
+        {
+            public int Compare(PkdObj<T, HasIdDate> d1, PkdObj<T, HasIdDate> d2) 
             {
-                var s1 = d1.Date.ToString();
-                var s2 = d2.Date.ToString();
+                var s1 = d1.Target.Date.ToString();
+                var s2 = d2.Target.Date.ToString();
 
                 if (s1 == s2)
                 {

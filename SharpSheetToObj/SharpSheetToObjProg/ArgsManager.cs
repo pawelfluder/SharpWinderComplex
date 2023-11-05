@@ -1,4 +1,5 @@
 ﻿using CSharpGameSynchProg.Info;
+using SharpSheetToObjProg.Objects;
 using System;
 
 namespace GameSynchCoreProj
@@ -49,7 +50,7 @@ namespace GameSynchCoreProj
         {
             var info = new SheetInfo2022();
             var synchService = new SychService(info);
-            synchService.SyncSheet(option);
+            synchService.SyncSheet<CryptoTransactions>("2022");
             return;
         }
 

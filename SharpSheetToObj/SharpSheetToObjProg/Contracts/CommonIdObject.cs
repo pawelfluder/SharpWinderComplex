@@ -1,9 +1,9 @@
 ﻿using CSharpGameSynchProg.Contracts;
-using SharpSheetToObjProg.HasProperty;
+using CSharpGameSynchProg.Interfaces;
 
 namespace CommonTypesCoreProj.Contracts
 {
-    public abstract class CommonIdObject : CommonObject, IHasId
+    public abstract class CommonIdObject : CommonObject, IHasIdProp
     {
         public abstract string Id { get; set; }
 
@@ -51,6 +51,11 @@ namespace CommonTypesCoreProj.Contracts
             result.Insert(0, id);
 
             return result;
+        }
+
+        internal static object ToIList(object value)
+        {
+            throw new NotImplementedException();
         }
     }
 }
