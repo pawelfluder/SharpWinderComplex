@@ -1,4 +1,4 @@
-﻿using CSharpGameSynchProg.Objects;
+﻿using SharpSheetToObjProg.Objects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,29 +49,21 @@ namespace CSharpGameSynchProg.Info
             LocalHost = "http://localhost:8080";
             ServerHost = "notki.com.pl";
 
-            //var assemblyPath = Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            //var assemblyPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-
-            //PathOfCredentialJson = assemblyPath + backSlash + "Credentials" + backSlash + "21-09-30_Notki-info_GameStatistics.json";
-
-            //PathOfCredentialJson = assemblyPath + backSlash + "credentials3.json";
-
-            //PrintPathOfCredectialJson();
-
             DataRange = "A4:F";
 
-            AddToDictionary(typeof(Approaches));
-            AddToDictionary(typeof(Rejections), typeof(Approaches));
+            AddToDictionary(typeof(CryptoTransactions));
+
+            //AddToDictionary(typeof(Approaches));
+            //AddToDictionary(typeof(Rejections), typeof(Approaches));
+            //AddToDictionary(typeof(Dates));
+            //AddToDictionary(typeof(Records));
+            //AddToDictionary(typeof(Contacts));
+            //AddToDictionary(typeof(Messages));
+            //AddToDictionary(typeof(Active));
+            //AddToDictionary(typeof(WinderActive), typeof(Active));
+
             //AddToDictionary(typeof(DataDate));
-            AddToDictionary(typeof(Dates));
             //AddToDictionary(typeof(Meetings));
-
-            AddToDictionary(typeof(Records));
-            AddToDictionary(typeof(Contacts));
-            AddToDictionary(typeof(Messages));
-            AddToDictionary(typeof(Active));
-            AddToDictionary(typeof(WinderActive), typeof(Active));
-
             //AddToDictionary(typeof(DataMigrations));
             //AddToDictionary(typeof(DataActive));
             //AddToDictionary(typeof(DataClosed));

@@ -3,8 +3,6 @@ using System.Reflection;
 using SharpYaml.Serialization;
 using CSharpGameSynchProg.Contracts;
 using CSharpGameSynchProg.Extensions;
-using CSharpGameSynchProg.Interfaces;
-using CSharpGameSynchProg.Objects;
 using CSharpGameSynchProg.Info;
 using SharpGoogleDocsProg.AAPublic;
 using CSharpGameSynchProg.Register;
@@ -13,6 +11,9 @@ using SharpGoogleSheetProg.AAPublic;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
 using SharpSetupProg21Private.AAPublic.Extensions;
+using SharpSheetToObjProg.Objects;
+using SharpSheetToObjProg;
+using SharpSheetToObjProg.HasProperty;
 
 namespace GameSynchCoreProj
 {
@@ -24,6 +25,7 @@ namespace GameSynchCoreProj
         private SheetInfoBase info;
         //private IPersistencyService persistency;
         private MessagesWorker messagesWorker;
+        private readonly SheetCache sheetCache;
         private static Serializer yamlSerializerSharp = new Serializer();
         private readonly IFileService fileService;
         private readonly IRepoService repoService;
@@ -40,16 +42,21 @@ namespace GameSynchCoreProj
             var startPath = info.LocalStartPath;
             var searchPlace = info.PersistencyFolder;
             //persistency = new PersistencyService(startPath, searchPlace);
+            sheetCache = new SheetCache();
             SetSheetsIdsForInfo();
             messagesWorker = new MessagesWorker();
+            
         }
 
         private void SetSheetsIdsForInfo()
         {
             var yearFolder = googleDriveService.Worker
                 .GetFolderByNameAndId(info.BaseFolder.Name, info.BaseFolder.Id);
-            var sheetFiles = googleDriveService.Worker
-                .GetFilesRequest($"'{yearFolder.Id}' in parents and mimeType='application/vnd.google-apps.spreadsheet'");
+
+            var sheetFiles = sheetCache.GetCache();
+
+            //var sheetFiles = googleDriveService.Worker
+            //    .GetFilesRequest($"'{yearFolder.Id}' in parents and mimeType='application/vnd.google-apps.spreadsheet'");
             var names = sheetFiles.Select(x => x.Name);
 
             var sheetInfos = info.GetAllSheetData();
@@ -68,20 +75,19 @@ namespace GameSynchCoreProj
             }
         }
 
-        public void SyncSheets(string option)
+        public void SyncSheet(string option)
         {
-            if (option != Options.CopyOnly)
+            var hasId = true;
+            if (hasId)
             {
-                SynchForCommonObjects<Dates>();
-                SynchForCommonObjects<Rejections>();
-                SynchForCommonObjects<Contacts>();
-                SynchForCommonObjects<Meetings>();
-                SynchForCommonObjects<Active>();
-                SynchForCommonObjects<WinderActive>();
+                SynchIdObjects<CryptoTransactions>();
+                return;
             }
 
-            SynchForCommonIdObjects<Approaches>();
-            NamedApproachesToOtherSheets<Approaches>(info);
+            //SynchObjects()
+
+
+            //NamedApproachesToOtherSheets<Approaches>(info);
 
             //var messages = GetAllMessages();
             //UpdateMessages(messages);
@@ -92,34 +98,22 @@ namespace GameSynchCoreProj
             Console.WriteLine("From " + from + " To " + to);
         }
 
-        private void UpdateMessages(IEnumerable<Messages> messages)
-        {
-            //string yamlResult = persistency.Serialize(messages);
-            var sheetData = info.GetSheetData(typeof(Messages));
-            //.SaveData(sheetData.PersistedIndexes, messages);
-
-            var dataToSaveToSheet = CommonObject.ToIList(messages.ToList());
-
-            List<string> headerNames = GetPropertyNames(typeof(Messages));
-            //googleSheetService.PasteDataAndFunctionsToSheet(sheetData.SpreadSheetId, sheetData.SheetId, dataToSaveToSheet, sheetData.ColumnNames, new List<(string, string)>());
-        }
-
         private void SynchForCommonObjects<T>() where T : CommonObject
         {
             var sheetData = info.GetSheetData(typeof(T));
             PrintInfo(sheetData.FileName + " " + sheetData.CopySheetTabName, sheetData.PersistencyName);
             var excelSheetData = GetExcelSheetData<T>(sheetData).ToList();
 
-            if (typeof(IHasDataProp).IsAssignableFrom(typeof(T)))
-            {
-                excelSheetData = excelSheetData.OrderByDateProperty();
-            }
+            //if (typeof(IHasDate).IsAssignableFrom(typeof(T)))
+            //{
+            //    excelSheetData = excelSheetData.OrderByDateProperty();
+            //}
 
             var mainAdrTuple = ("Persistency", "03");
             var year = "2022";
 
-            var approachesAdrTuple = repoService
-                .GetItemList<Approaches>(year);
+            //var approachesAdrTuple = repoService
+            //    .GetItemList<Approaches>(year);
 
             //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes);
 
@@ -138,33 +132,34 @@ namespace GameSynchCoreProj
         private (List<T> mergedData, JoinDataCount changesInfo) JoinData<T>(
             List<T> excelSheetData,
             List<T> persistedData)
-            where T : CommonIdObject, IHasIdProp
+            where T : class
         {
-            CheckDistinctIds(excelSheetData.Select(x => (IHasIdProp)x));
-            CheckDistinctIds(persistedData.Select(x => (IHasIdProp)x));
+            CheckDistinctIds(excelSheetData.Select(x => (IHasId)x));
+            CheckDistinctIds(persistedData.Select(x => (IHasId)x));
 
-            var removedData = persistedData.Where(x => !excelSheetData.Any(y => y.Id == x.Id));
-            
-            var newData = excelSheetData.Where(x => !persistedData.Any(y => y.Id == x.Id));
+            //var removedData = persistedData.Where(x => !excelSheetData.Any(y => y.Id == x.Id));
 
-            var changes = GetChanges(persistedData, excelSheetData);
+            //var newData = excelSheetData.Where(x => !persistedData.Any(y => y.Id == x.Id));
 
-            var changed = changes.Where(x => x.Item1 == true).ToList();
-            var existedSheetData = changes.Select(x => x.Item2);
-            var allDataToSave = new List<T>(removedData.Concat(existedSheetData).Concat(newData));//.OrderByDescending(x => x.Date).ToList();
-            var orderedDataToSave = allDataToSave.OrderByDateProperty();
+            //var changes = GetChanges(persistedData, excelSheetData);
 
-            var dataCount = new JoinDataCount(
-               persistedData.Count(),
-               excelSheetData.Count(),
-               removedData.Count(),
-               newData.Count(),
-               changes.Count(x => x.Item1 == false),
-               changes.Count(x => x.Item1 == true),
-               existedSheetData.Count(),
-               orderedDataToSave.Count());
+            //var changed = changes.Where(x => x.Item1 == true).ToList();
+            //var existedSheetData = changes.Select(x => x.Item2);
+            //var allDataToSave = new List<T>(removedData.Concat(existedSheetData).Concat(newData));//.OrderByDescending(x => x.Date).ToList();
+            //var orderedDataToSave = allDataToSave.OrderByDateProperty();
 
-            return (orderedDataToSave, dataCount);
+            //var dataCount = new JoinDataCount(
+            //   persistedData.Count(),
+            //   excelSheetData.Count(),
+            //   removedData.Count(),
+            //   newData.Count(),
+            //   changes.Count(x => x.Item1 == false),
+            //   changes.Count(x => x.Item1 == true),
+            //   existedSheetData.Count(),
+            //   orderedDataToSave.Count());
+
+            //return (orderedDataToSave, dataCount);
+            return default;
         }
 
         private bool IsDataCorrupted<T>(List<T> excelSheetData, List<T> persistedData) where T : CommonObject
@@ -213,50 +208,81 @@ namespace GameSynchCoreProj
             throw new Exception();
         }
 
-        private void SynchForCommonIdObjects<T>() where T : CommonIdObject, IHasIdProp
+        private void SynchIdObjects<T>() where T : class
         {
             var sheetData = info.GetSheetData(typeof(T));
             PrintInfo("Sheet; " + sheetData.FileName + "; " + sheetData.CopySheetTabName, "File; " + sheetData.PersistencyName);
-            List<T> excelSheetData = GetExcelSheetData<T>(sheetData);
+            List<T> excelSheetData2 = GetExcelSheetData<T>(sheetData);
+
+            var excelSheetData = CastList<IHasIdDate>(excelSheetData2);
+
             var gg = ListDataNotCorrupted(excelSheetData);
             if (!AllPropertiesAreNotNull(excelSheetData.First())) { excelSheetData = excelSheetData.Skip(1).ToList(); }
 
+            
+
             var orderedExcelSheetData = excelSheetData.OrderByDateProperty().ToList();
-            var year = "2022";
-            var persistedData = repoService.GetItemList<T>(year);
+            //var year = "2022";
+            //var persistedData = repoService.GetItemList<T>(year);
 
 
-            if (IsDataCorrupted(excelSheetData, persistedData))
-            {
-                return;
-            }
+            //if (IsDataCorrupted(excelSheetData, persistedData))
+            //{
+            //    return;
+            //}
 
-            var (mergedData, changesInfo) = JoinData(excelSheetData, persistedData);
+            //var (mergedData, changesInfo) = JoinData(excelSheetData, persistedData);
 
-            if (changesInfo.CountOfRemovedData > 0 ||
-                changesInfo.CountOfNewData > 0 ||
-                changesInfo.CountOfChangedData > 0 &&
-                changesInfo.CountOfChangedData <= 1)
-            {
-                //string yamlResult = persistency.Serialize(mergedData);
-                CheckDistinctIds(mergedData.Select(x => (IHasIdProp)x));
-                //persistency.SaveData(sheetData.PersistedIndexes, mergedData);
-                var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
+            //if (changesInfo.CountOfRemovedData > 0 ||
+            //    changesInfo.CountOfNewData > 0 ||
+            //    changesInfo.CountOfChangedData > 0 &&
+            //    changesInfo.CountOfChangedData <= 1)
+            //{
+            //    //string yamlResult = persistency.Serialize(mergedData);
+            //    CheckDistinctIds(mergedData.Select(x => (IHasIdProp)x));
+            //    //persistency.SaveData(sheetData.PersistedIndexes, mergedData);
+            //    var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
 
-                var headerNames = GetPropertyNames(typeof(T));
-                var sheetToUpdate = info.GetSheetData(typeof(T));
-                //var formulas = GetFormulas(typeof(T));
+            //    var headerNames = GetPropertyNames(typeof(T));
+            //    var sheetToUpdate = info.GetSheetData(typeof(T));
+            //    //var formulas = GetFormulas(typeof(T));
 
-                //googleSheetService.Worker.PasteDataAndFunctionsToSheet(
-                //sheetToUpdate.SpreadSheetId,
-                //sheetToUpdate.SheetId,
-                //dataToSave,
-                //headerNames,
-                //formulas);
-            }
+            //    //googleSheetService.Worker.PasteDataAndFunctionsToSheet(
+            //    //sheetToUpdate.SpreadSheetId,
+            //    //sheetToUpdate.SheetId,
+            //    //dataToSave,
+            //    //headerNames,
+            //    //formulas);
+            //}
         }
 
-        public bool ListDataNotCorrupted(IEnumerable<IHasIdProp> objList)
+        public List<T> CastList<T>(IEnumerable<object> theList)
+        {
+            var result = new List<T>();
+            foreach (var item in theList)
+            {
+                CastAndAdd(item, result);
+            }
+            return result;
+        }
+
+        //public List<T> CastAndAdd2<T>(
+        //    object objThatImplementsMyInterface,
+        //    IList<T> theList)
+        //{
+        //    typeof(T1).
+        //    var tmp1 = (T1)objThatImplementsMyInterface;
+        //    var tmp2 = (T2)tmp1;
+        //    theList.Add();
+        //}
+
+        public void CastAndAdd<T>(object objThatImplementsMyInterface, IList<T> theList)
+        {
+            var cast = (T)objThatImplementsMyInterface;
+            theList.Add();
+        }
+
+        public bool ListDataNotCorrupted(IEnumerable<IHasId> objList)
         {
             var distictIds = CheckDistinctIds(objList);
             var allPropertiesAreNotNull = AllPropertiesAreNotNull(objList);
@@ -265,7 +291,7 @@ namespace GameSynchCoreProj
             return dataNotCorrupted;
         }
 
-        public bool AllPropertiesAreNotNull_InFirstData(ref IEnumerable<IHasIdProp> objList)
+        public bool AllPropertiesAreNotNull_InFirstData(ref IEnumerable<IHasId> objList)
         {
             var first = objList.First();
             if (!AllPropertiesAreNotNull(first))
@@ -310,7 +336,7 @@ namespace GameSynchCoreProj
             return true;
         }
 
-        public bool CheckDistinctIds(IEnumerable<IHasIdProp> data)
+        public bool CheckDistinctIds(IEnumerable<IHasId> data)
         {
             bool result = false;
             var distinctList = data.DistinctBy(x => x.Id).ToList();
@@ -402,7 +428,7 @@ namespace GameSynchCoreProj
             return result;
         }
 
-        private List<T> GetExcelSheetData<T>(SheetData sheetData) where T : CommonObject
+        private List<T> GetExcelSheetData<T>(SheetData sheetData) where T : class
         {
             var sheetListOfList = googleSheetService.Worker
                 .GetSheetData(sheetData.SpreadSheetId, sheetData.SheetId, sheetData.DataRange);
@@ -412,38 +438,6 @@ namespace GameSynchCoreProj
             var result = fileService.Yaml.Custom03.Deserialize<List<T>>(yamlText);
 
             return result;
-        }
-
-        private void NamedApproachesToOtherSheets<T>(SheetInfoBase info) where T : CommonIdObject
-        {
-            var sheetData = info.GetSheetData(typeof(Approaches));
-            //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes).ToList();
-
-            if (info.PreviousSheetInfo.Count() > 0)
-            {
-                var temp = new List<string>() { info.PreviousSheetInfo.First().Year, "Approaches" };
-                //var persistedData2 = persistency.GetData<List<T>>(temp);
-                //persistedData.AddRange(persistedData2);
-            }
-
-            //var orderedData = persistedData.OrderByDateProperty();
-            //var result = CommonIdObject.ToIList(orderedData.ConvertAll(x => (CommonIdObject)x));
-            var sheetsToUpdate = info.GetAllSheetData();
-
-            var propertyNames = GetPropertyNames(typeof(T));
-            var formulas = GetFormulas(typeof(T));
-
-            foreach (var sheetToUpdate in sheetsToUpdate)
-            {
-                PrintInfo(sheetData.FileName + " " + sheetData.CopySheetTabName, sheetToUpdate.FileName + " " + sheetToUpdate.CopySheetTabName);
-                //var sheetId = googleSheetService.GetSheetIdByTabName(sheetToUpdate.SpreadSheetId, sheetToUpdate.CopySheetTabName).ToString();
-                //googleSheetService.PasteDataAndFunctionsToSheet(
-                //   sheetToUpdate.SpreadSheetId,
-                //   sheetId,
-                //   result,
-                //   propertyNames,
-                //   formulas);
-            }
         }
 
         private List<string> GetPropertyNames(Type type)

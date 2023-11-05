@@ -12,9 +12,9 @@ using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Net.Mail;
 using Unity;
-using OutBorder01 = SharpFileServiceProg.Repetition.OutBorder;
-using OutBorder02 = SharpConfigProg.Repetition.OutBorder;
-using OutBorder03 = SharpRepoServiceProg.Repetition.OutBorder;
+using OutBorder01 = SharpFileServiceProg.AAPublic.OutBorder;
+using OutBorder02 = SharpConfigProg.AAPublic.OutBorder;
+using OutBorder03 = SharpRepoServiceProg.AAPublic.OutBorder;
 
 namespace SharpTinderComplexTests
 {

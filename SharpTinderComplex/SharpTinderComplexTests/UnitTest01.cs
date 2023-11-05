@@ -1,4 +1,4 @@
-﻿using SharpFileServiceProg.Repetition;
+﻿using SharpFileServiceProg.AAPublic;
 using SharpFileServiceProg.Service;
 
 namespace SharpTinderComplexTests

@@ -47,37 +47,10 @@ namespace GameSynchCoreProj
 
         private void ResolveForYear(string year, string option)
         {
-            if (year == "2023")
-            {
-                var info = new SheetInfo2023();
-                var synchService = new SychService(info);
-                synchService.SyncSheets(option);
-                return;
-            }
-
-            if (year == "2022")
-            {
-                var info = new SheetInfo2022();
-                var synchService = new SychService(info);
-                synchService.SyncSheets(option);
-                return;
-            }
-
-            if (year == "2021")
-            {
-                var info = new SheetInfo2021();
-                var synchService = new SychService(info);
-                synchService.SyncSheets(option);
-                return;
-            }
-
-            if (year == "2020")
-            {
-                var info = new SheetInfo2020();
-                var synchService = new SychService(info);
-                synchService.SyncSheets(option);
-                return;
-            }
+            var info = new SheetInfo2022();
+            var synchService = new SychService(info);
+            synchService.SyncSheet(option);
+            return;
         }
 
         private void HandleWrongArgumentsError()

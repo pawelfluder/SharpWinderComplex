@@ -1,10 +1,13 @@
-﻿using SharpConfigProg.ConfigPreparer;
+﻿using SharpConfigProg.AAPublic;
+using SharpConfigProg.Service;
 using System.Management.Automation;
 
 namespace SharpTinderComplexTests
 {
     internal class WinderPreparer : IPreparer
     {
+        private IConfigService configService;
+
         public WinderPreparer()
         {
         }
@@ -27,6 +30,11 @@ namespace SharpTinderComplexTests
             }
 
             return dict;
+        }
+
+        public void SetConfigService(IConfigService configService)
+        {
+            this.configService = configService;
         }
 
         private Dictionary<string, object> PrepareForLocal()

@@ -1,5 +1,6 @@
 ﻿using CommonTypesCoreProj.Contracts;
 using CSharpGameSynchProg.Contracts;
+using SharpSheetToObjProg.HasProperty;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,18 +14,18 @@ namespace CSharpGameSynchProg.Extensions
             return null;
         }
 
-        public static List<T> OrderByDateProperty<T>(this List<T> inputList) where T : CommonObject
+        public static List<T> OrderByDateProperty<T>(this List<T> inputList) where T : IHasDate
         {
             var result = inputList.OrderByDescending(num => num, new SpecialComparer()).ToList();
             return result;
         }
 
-        public class SpecialComparer : IComparer<CommonObject>
+        public class SpecialComparer : IComparer<IHasDate>
         {
-            public int Compare(CommonObject d1, CommonObject d2)
+            public int Compare(IHasDate d1, IHasDate d2)
             {
-                var s1 = ToDateString(d1);
-                var s2 = ToDateString(d2);
+                var s1 = d1.Date.ToString();
+                var s2 = d2.Date.ToString();
 
                 if (s1 == s2)
                 {

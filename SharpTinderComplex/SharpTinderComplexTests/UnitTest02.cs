@@ -46,13 +46,13 @@ namespace SharpTinderComplexTests
                 ShowWindow(item.MainWindowHandle, 0);
             }
 
-            Thread.Sleep(12 * 1000);
+            Thread.Sleep(20 * 1000);
 
             Process[] remoteByName02 = Process.GetProcessesByName(firefoxName);
             foreach (var item in remoteByName02)
             {
-                //item.Close();
-                item.Kill();
+                item.CloseMainWindow();
+                item.Close();
             }
         }
 
@@ -249,7 +249,7 @@ namespace SharpTinderComplexTests
             var appData = configService.SettingsDict["winderAppDataPath"].ToString();
             var mainAddress = (appData, "");
             var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, "tinder");
-            var addressIn = repoService.Methods.GetPathsByName(
+            var addressIn = repoService.Methods.GetAdrTupleByNameList(
                 mainAddress2, new List<string> { "exportedApiData" });
             var addressOut = repoService.Methods.CreateFolder(mainAddress2, "conversationAsTest");
             var accountNamesList = repoService.Methods.GetAllFoldersNames(addressIn);
@@ -271,7 +271,7 @@ namespace SharpTinderComplexTests
             var appData = configService.SettingsDict["winderRepoName"].ToString();
             var mainAddress = (appData, "");
             var mainAddress2 = repoService.Methods.GetExistingItem(mainAddress, FolderNames.Winder);
-            var addressIn = repoService.Methods.GetPathsByName(
+            var addressIn = repoService.Methods.GetAdrTupleByNameList(
                 mainAddress2, new List<string> { "exportedApiData" });
             var accountNamesList = repoService.Methods.GetAllFoldersNames(addressIn);
             accountNamesList.Sort();

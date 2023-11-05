@@ -5,8 +5,8 @@ using SharpRepoServiceProg.Service;
 using SharpTinderComplexTests.Repetition;
 using SharpTinderComplexTests.Repetition.RepoService;
 using Unity;
-using OutBorder01 = SharpFileServiceProg.Repetition.OutBorder;
-using OutBorder02 = SharpConfigProg.Repetition.OutBorder;
+using OutBorder01 = SharpFileServiceProg.AAPublic.OutBorder;
+using OutBorder02 = SharpConfigProg.AAPublic.OutBorder;
 
 namespace SharpTinderComplexTests
 {

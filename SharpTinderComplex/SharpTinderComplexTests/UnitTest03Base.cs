@@ -8,8 +8,8 @@ using SharpTinderComplexTests.Repetition;
 using System.Collections.ObjectModel;
 using System.Management.Automation;
 using Unity;
-using OutBorder01 = SharpFileServiceProg.Repetition.OutBorder;
-using OutBorder02 = SharpConfigProg.Repetition.OutBorder;
+using OutBorder01 = SharpFileServiceProg.AAPublic.OutBorder;
+using OutBorder02 = SharpConfigProg.AAPublic.OutBorder;
 
 namespace SharpTinderComplexTests
 {

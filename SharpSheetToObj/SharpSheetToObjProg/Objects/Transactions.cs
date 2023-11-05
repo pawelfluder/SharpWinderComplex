@@ -1,4 +1,6 @@
-﻿using System;
+﻿using CommonTypesCoreProj.Contracts;
+using SharpSheetToObjProg.HasProperty;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SharpSheetToObjProg.Objects
 {
-    internal class Transactions
+    internal class CryptoTransactions : IHasId, IHasDate
     {
         public string Link { get; set; }
 
