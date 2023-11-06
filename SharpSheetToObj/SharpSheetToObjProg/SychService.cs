@@ -1,5 +1,4 @@
-﻿using CommonTypesCoreProj.Contracts;
-using System.Reflection;
+﻿using System.Reflection;
 using SharpYaml.Serialization;
 using CSharpGameSynchProg.Contracts;
 using CSharpGameSynchProg.Extensions;
@@ -11,7 +10,6 @@ using SharpGoogleSheetProg.AAPublic;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
 using SharpSetupProg21Private.AAPublic.Extensions;
-using SharpSheetToObjProg.Objects;
 using SharpSheetToObjProg;
 using SharpSheetToObjProg.HasProperty;
 using SharpSheetToObjProg.Merge;
@@ -226,11 +224,9 @@ namespace GameSynchCoreProj
             {
                 CheckDistinctIds(mergedData.Select(x => x.Target));
                 var persitedDataToSave = mergedData.Select(x => x.Source);
-                var sheetDataToSave = ToIListQIList(mergedData);
-
+                var sheetDataToSave = ToIListOfIList(mergedData);
 
                 var yamlResult = repoService.SaveItemList<T>(persitedDataToSave, year);
-                
 
                 var headerNames = GetPropertyNames(typeof(T));
                 var sheetToUpdate = info.GetSheetData(typeof(T));
@@ -244,7 +240,7 @@ namespace GameSynchCoreProj
             }
         }
 
-        public IList<IList<object>> ToIListQIList<T>(IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
+        public IList<IList<object>> ToIListOfIList<T>(IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
         {
             var result = inputList.Select(x => ToIList(x.Source)).ToList();
             return result;
