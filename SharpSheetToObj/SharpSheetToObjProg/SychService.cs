@@ -128,35 +128,147 @@ namespace GameSynchCoreProj
             CheckDistinctIds(sheetData.Select(x => (IHasId)x.Target));
             CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
 
+            var sheetMore = sheetData
+                .Where(x1 => !(persistedData.Select(x2 => x2.Target)
+                .Any(y => y.Id != x1.Target.Id)));
+            var sheetMoreIds = sheetMore.Select(x => x.Target.Id).ToList();
+
+            var persitedMore = persistedData
+                .Where(x1 => !(sheetData.Select(x2 => x2.Target)
+                .Any(y => y.Id != x1.Target.Id)));
+            var persitedMoreIds = persitedMore.Select(x => x.Target.Id).ToList();
+
+            var sameTuple2 = CompareLists<PkdObj<T, HasIdDate>, string> (
+                sheetData,
+                persistedData,
+                x => x.Target.Id);
+
+            var sameTuple3 = CompareLists3<T>(
+                sheetData,
+                persistedData);
+
+            var sameIds = sameTuple3.Select(x => x.Item1.Target.Id).ToList();
+
+            var updateTuple = FindDiffrentProperties<T>(sameTuple3);
+            var updateIds = updateTuple.Select(x => x.Item1.Target.Id).ToList();
+
             var removedData = persistedData
                 .Where(x1 => !(sheetData.Select(x2 => x2.Target)
                 .Any(y => y.Id == x1.Target.Id)));
-            //var removedData = persistedData.Where(x => !excelSheetData.Any(y => y.Id == x.Id));
 
             var newData = sheetData
                 .Where(x => !(persistedData.Select(x2 => x2.Target)
                 .Any(y => y.Id == x.Target.Id)));
 
-            //var changes = GetChanges(persistedData, excelSheetData);
-            var changes = GetChanges(persistedData, sheetData);
+            var merge = GetMerge(persistedData, sheetData);
 
-            var changed = changes.Where(x => x.Item1 == true).ToList();
-            var existedSheetData = changes.Select(x => x.Item2);
-            var allDataToSave = new List<PkdObj<T, HasIdDate>>(removedData.Concat(existedSheetData).Concat(newData));//.OrderByDescending(x => x.Date).ToList();
-            //var orderedDataToSave = allDataToSave.OrderByDateProperty();
+            var changed = merge.Where(x => x.Item1 == true).ToList();
+            var existedSheetData = merge.Select(x => x.Item2);
+            var allDataToSave = removedData.Concat(existedSheetData).Concat(newData)
+                .OrderByDescending(x => x.Target.Date).ToList();
+            var orderedDataToSave = allDataToSave.OrderByDateProperty();
 
             var dataCount = new JoinDataCount(
                persistedData.Count(),
                sheetData.Count(),
                removedData.Count(),
                newData.Count(),
-               changes.Count(x => x.Item1 == false),
-               changes.Count(x => x.Item1 == true),
+               merge.Count(x => x.Item1 == false),
+               merge.Count(x => x.Item1 == true),
                existedSheetData.Count(),
                allDataToSave.Count());
-               //orderedDataToSave.Count());
 
             return (allDataToSave, dataCount);
+        }
+
+        
+
+        public IEnumerable<(T, T)> CompareLists<T, TKey>(IEnumerable<T> list1, IEnumerable<T> list2, Func<T, TKey> keySelector)
+        {
+            var commonElements = list1
+                .Join(list2, keySelector, keySelector, (item1, item2) => (item1, item2))
+                .ToList();
+
+            return commonElements;
+        }
+
+        public IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>
+            CompareLists3<T>(
+            IEnumerable<PkdObj<T, HasIdDate>> list1,
+            IEnumerable<PkdObj<T, HasIdDate>> list2)
+        {
+            var result = new List<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>();
+            var count = list1.Count();
+
+            for (int i = 0; i < count; i++)
+            {
+                var item1 = list1.ElementAt(i);
+                var item2 = list2.ElementAt(i);
+
+                if (item1.Target.Id == item2.Target.Id)
+                {
+                    result.Add((item1, item2));
+                }
+            }
+
+            return result;
+        }
+
+        public List<Tuple<T, T>> CompareLists2<T, TKey>(List<T> list1, List<T> list2, Func<T, TKey> keySelector)
+        {
+            var commonElements = list1
+                .Join(list2, keySelector, keySelector, (item1, item2) => Tuple.Create(item1, item2))
+                .ToList();
+
+            return commonElements;
+        }
+
+        private IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>
+            FindDiffrentProperties<T>(
+            IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)> sameTuple)
+            where T : class
+        {
+            var result = new List<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>();
+
+            foreach (var item in sameTuple)
+            {
+                if (!Equals(item.Item1.Source, item.Item2.Source))
+                {
+                    result.Add(item);
+                }
+            }
+
+            return result;
+        }
+
+        public bool Equals(object obj01, object obj02)
+        {
+            var thisTuples = GetTuples(obj02);
+            var objTuples = GetTuples(obj01);
+
+            if (thisTuples.Length != objTuples.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < thisTuples.Length; i++)
+            {
+                var tuple01 = thisTuples[i];
+                var tuple02 = objTuples[i];
+                if (tuple01 != tuple02)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public (string, string)[] GetTuples(object obj)
+        {
+            var properties = obj.GetType().GetProperties();
+            var tuples = properties.Select(x => (x.Name, x.GetValue(obj).ToString())).ToArray();
+            return tuples;
         }
 
         private bool IsDataCorrupted<T>(
@@ -232,32 +344,67 @@ namespace GameSynchCoreProj
                 return;
             }
 
-            var (mergedData, changesInfo) = MergeData(pkdOrderedSheetData, pkdPersistedData);
+            var (mergedData, mergeInfo) = MergeData(pkdOrderedSheetData, pkdPersistedData);
 
-            if (changesInfo.CountOfRemovedData > 0 ||
-                changesInfo.CountOfNewData > 0 ||
-                changesInfo.CountOfChangedData > 0 &&
-                changesInfo.CountOfChangedData <= 1)
+            if (mergeInfo.CountOfRemovedData > 0 ||
+                mergeInfo.CountOfNewData > 0 ||
+                mergeInfo.CountOfChangedData > 0 &&
+                mergeInfo.CountOfChangedData <= 1)
             {
                 
                 CheckDistinctIds(mergedData.Select(x => x.Target));
                 var yamlResult = repoService.SaveItemList<T>(mergedData.Select(x => x.Source), year);
-                //var dataToSave = CommonIdObject.ToIList(mergedData.ConvertAll(x => (CommonIdObject)x));
+                var dataToSave = ToIListQIList(mergedData);
 
                 var headerNames = GetPropertyNames(typeof(T));
                 var sheetToUpdate = info.GetSheetData(typeof(T));
-                var formulas = GetFormulas(typeof(T));
+                //var formulas = GetFormulas(typeof(T));
 
-                googleSheetService.Worker.PasteDataAndFunctionsToSheet(
-                sheetToUpdate.SpreadSheetId,
-                sheetToUpdate.SheetId,
-                dataToSave,
-                headerNames,
-                formulas);
+                //googleSheetService.Worker.PasteDataToSheet(
+                //sheetToUpdate.SpreadSheetId,
+                //sheetToUpdate.SheetTabName,
+                //dataToSave,
+                //headerNames);
             }
         }
 
-        public List<T> CastList<T>(IEnumerable<object> theList)
+        public IList<IList<object>> ToIListQIList<T>(IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
+        {
+            var result = inputList.Select(x => ToIList(x.Source)).ToList();
+            return result;
+        }
+
+        //public  IList<IList<object>> ToIListQIList<T>(IList<T> inputList) where T: class
+        //{
+        //    var result = inputList.Select(x => ToIList(x)).ToList();
+        //    return result;
+        //}
+
+        public IList<object> ToIList(object obj)
+        {
+            var properties = obj.GetType().GetProperties();
+            var result = new List<object>();
+            var id = string.Empty;
+
+            foreach (var property in properties)
+            {
+                var value = property.GetValue(obj, null);
+
+                if (property.Name == "Id")
+                {
+                    id = value.ToString();
+                    continue;
+                }
+
+                result.Add(value);
+            }
+
+            result.Insert(0, id);
+
+            return result;
+        }
+
+        public IList<T> CastList<T>(IEnumerable<object> theList)
         {
             var result = new List<T>();
             foreach (var item in theList)
@@ -388,7 +535,7 @@ namespace GameSynchCoreProj
             return string.Empty;
         }
 
-        private IEnumerable<(bool, PkdObj<T, HasIdDate>)> GetChanges<T>(
+        private IEnumerable<(bool, PkdObj<T, HasIdDate>)> GetMerge<T>(
             IEnumerable<PkdObj<T, HasIdDate>> persistedData,
             IEnumerable<PkdObj<T, HasIdDate>> excelSheetData) where T : class
         {

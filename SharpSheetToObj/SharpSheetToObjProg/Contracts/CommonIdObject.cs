@@ -1,9 +1,9 @@
 ﻿using CSharpGameSynchProg.Contracts;
-using CSharpGameSynchProg.Interfaces;
+using SharpSheetToObjProg.HasProperty;
 
 namespace CommonTypesCoreProj.Contracts
 {
-    public abstract class CommonIdObject : CommonObject, IHasIdProp
+    public abstract class CommonIdObject : CommonObject, IHasId
     {
         public abstract string Id { get; set; }
 
