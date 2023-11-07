@@ -1,8 +1,6 @@
 ﻿using System.Reflection;
 using SharpYaml.Serialization;
-using CSharpGameSynchProg.Contracts;
 using CSharpGameSynchProg.Extensions;
-using CSharpGameSynchProg.Info;
 using SharpGoogleDocsProg.AAPublic;
 using CSharpGameSynchProg.Register;
 using SharpGoogleDriveProg.AAPublic;
@@ -13,6 +11,7 @@ using SharpSetupProg21Private.AAPublic.Extensions;
 using SharpSheetToObjProg;
 using SharpSheetToObjProg.HasProperty;
 using SharpSheetToObjProg.Merge;
+using SharpSheetToObjProg.Info;
 
 namespace GameSynchCoreProj
 {
@@ -21,58 +20,68 @@ namespace GameSynchCoreProj
         private IGoogleDocsService googleDocsService;
         private IGoogleDriveService googleDriveService;
         private IGoogleSheetService googleSheetService;
-        private SheetInfoBase info;
-        //private IPersistencyService persistency;
+        private SheetInfoGroup sheetGroup;
         private MessagesWorker messagesWorker;
-        private readonly SheetCache sheetCache;
-        private static Serializer yamlSerializerSharp = new Serializer();
         private readonly IFileService fileService;
         private readonly IRepoService repoService;
 
-        public SychService(SheetInfoBase info)
+        public SychService()
         {
-            this.info = info;
+            this.sheetGroup = new SheetInfoGroup();
             googleDocsService = MyBorder.Container.Resolve<IGoogleDocsService>();
             googleDriveService = MyBorder.Container.Resolve<IGoogleDriveService>();
             googleSheetService = MyBorder.Container.Resolve<IGoogleSheetService>();
             fileService = MyBorder.Container.Resolve<IFileService>();
             repoService = MyBorder.Container.Resolve<IRepoService>();
-
-            var startPath = info.LocalStartPath;
-            var searchPlace = info.PersistencyFolder;
-            //persistency = new PersistencyService(startPath, searchPlace);
-            sheetCache = new SheetCache();
-            SetSheetsIdsForInfo();
+            //SetSheetsIdsForInfo();
             messagesWorker = new MessagesWorker();
-            
         }
 
-        private void SetSheetsIdsForInfo()
+        //public void RegisterSheet<T>(
+        //    string[] names)
+        //{
+        //    var type = typeof(T);
+        //    var sheetInfo = new SheetInfo(type, names);
+        //    sheetGroup.Add<T>(sheetInfo);
+        //}
+
+        public void RegisterSheet(
+            Type type,
+            string fileName,
+            string spreadSheetId,
+            string sheetId,
+            string title)
         {
-            var yearFolder = googleDriveService.Worker
-                .GetFolderByNameAndId(info.BaseFolder.Name, info.BaseFolder.Id);
-
-            var sheetFiles = sheetCache.GetCache();
-
-            //var sheetFiles = googleDriveService.Worker
-            //    .GetFilesRequest($"'{yearFolder.Id}' in parents and mimeType='application/vnd.google-apps.spreadsheet'");
-            var names = sheetFiles.Select(x => x.Name);
-
-            var sheetInfos = info.GetAllSheetData();
-
-            foreach (var sheetInfo in sheetInfos)
-            {
-                try
-                {
-                    var spreadSheetId = sheetFiles.Single(x => x.Name == sheetInfo.FileName).Id;
-                    var spreadSheet = googleSheetService.Worker.GetSpreadsheet(spreadSheetId);
-                    var sheet = spreadSheet.Sheets.SingleOrDefault(x => x.Properties.Title == sheetInfo.SheetTabName);
-                    var sheetId = sheet.Properties.SheetId.ToString();
-                    sheetInfo.SetIds(spreadSheetId, sheetId);
-                }
-                catch { }
-            }
+            var sheetInfo = new SheetInfo(type, fileName, spreadSheetId, sheetId, title);
+            sheetGroup.Add(type, sheetInfo);
         }
+
+        //private void SetSheetsIdsForInfo()
+        //{
+        //    var yearFolder = googleDriveService.Worker
+        //        .GetFolderByNameAndId(info.BaseFolder.Name, info.BaseFolder.Id);
+
+        //    var sheetFiles = sheetCache.GetCache();
+
+        //    //var sheetFiles = googleDriveService.Worker
+        //    //    .GetFilesRequest($"'{yearFolder.Id}' in parents and mimeType='application/vnd.google-apps.spreadsheet'");
+        //    var names = sheetFiles.Select(x => x.Name);
+
+        //    var sheetInfos = info.GetAllSheetData();
+
+        //    foreach (var sheetInfo in sheetInfos)
+        //    {
+        //        try
+        //        {
+        //            var spreadSheetId = sheetFiles.Single(x => x.Name == sheetInfo.SheetTabName).Id;
+        //            var spreadSheet = googleSheetService.Worker.GetSpreadsheet(spreadSheetId);
+        //            var sheet = spreadSheet.Sheets.SingleOrDefault(x => x.Properties.Title == sheetInfo.SheetTabName);
+        //            var sheetId = sheet.Properties.SheetId.ToString();
+        //            sheetInfo.SetIds(spreadSheetId, sheetId);
+        //        }
+        //        catch { }
+        //    }
+        //}
 
         public void SyncSheet<T>(params string[] names) where T : class
         {
@@ -89,36 +98,36 @@ namespace GameSynchCoreProj
             Console.WriteLine("From " + from + " To " + to);
         }
 
-        private void SynchForCommonObjects<T>() where T : CommonObject
-        {
-            var sheetData = info.GetSheetData(typeof(T));
-            PrintInfo(sheetData.FileName + " " + sheetData.CopySheetTabName, sheetData.PersistencyName);
-            var excelSheetData = GetExcelSheetData<T>(sheetData).ToList();
+        //private void SynchForCommonObjects<T>() where T : CommonObject
+        //{
+        //    var sheetData = info.GetSheetData(typeof(T));
+        //    PrintInfo(sheetData.FileName + " " + sheetData.CopySheetTabName, sheetData.PersistencyName);
+        //    var excelSheetData = GetExcelSheetData<T>(sheetData).ToList();
 
-            //if (typeof(IHasDate).IsAssignableFrom(typeof(T)))
-            //{
-            //    excelSheetData = excelSheetData.OrderByDateProperty();
-            //}
+        //    //if (typeof(IHasDate).IsAssignableFrom(typeof(T)))
+        //    //{
+        //    //    excelSheetData = excelSheetData.OrderByDateProperty();
+        //    //}
 
-            var mainAdrTuple = ("Persistency", "03");
-            var year = "2022";
+        //    var mainAdrTuple = ("Persistency", "03");
+        //    var year = "2022";
 
-            //var approachesAdrTuple = repoService
-            //    .GetItemList<Approaches>(year);
+        //    //var approachesAdrTuple = repoService
+        //    //    .GetItemList<Approaches>(year);
 
-            //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes);
+        //    //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes);
 
-            //if (IsDataCorrupted(excelSheetData, persistedData))
-            //{
-            //    return;
-            //}
+        //    //if (IsDataCorrupted(excelSheetData, persistedData))
+        //    //{
+        //    //    return;
+        //    //}
 
-            if (true)
-            {
-                //string yamlResult = persistency.Serialize(excelSheetData);
-                //persistency.SaveData(sheetData.PersistedIndexes, excelSheetData);
-            }
-        }
+        //    if (true)
+        //    {
+        //        //string yamlResult = persistency.Serialize(excelSheetData);
+        //        //persistency.SaveData(sheetData.PersistedIndexes, excelSheetData);
+        //    }
+        //}
 
         private (IEnumerable<PkdObj<T, HasIdDate>> mergedData, MergeInfo<T> changesInfo)
             MergeData<T>(
@@ -139,6 +148,12 @@ namespace GameSynchCoreProj
         {
             var merge = mergeInfo.SheetMore
                 .Concat(mergeInfo.SameTuple.Select(x => x.Item1));
+
+            //if (mergeInfo.Counts.SheetMore == 0 &&
+            //    mergeInfo.Counts.PersistedMore > 0)
+            //{
+            //    merge = merge.Concat(mergeInfo.PersitedMore);
+            //}
 
             return merge;
         }
@@ -196,8 +211,7 @@ namespace GameSynchCoreProj
         private void SynchIdDataObjects<T>(params string[] names) where T : class
         {
             var year = names[0]; // "2022";
-            var sheetData = info.GetSheetData(typeof(T));
-            PrintInfo("Sheet; " + sheetData.FileName + "; " + sheetData.CopySheetTabName, "File; " + sheetData.PersistencyName);
+            var sheetData = sheetGroup.Get(typeof(T));
             List<T> excelSheetData = GetExcelSheetData<T>(sheetData);
 
             var objectPacker = new ObjectPacker();
@@ -206,37 +220,36 @@ namespace GameSynchCoreProj
             var gg = AllDataChecks(pkdSheetData);
             if (!AllPropertiesAreNotNull(pkdSheetData.First())) { pkdSheetData = pkdSheetData.Skip(1).ToList(); }
 
-            var pkdOrderedSheetData = pkdSheetData.OrderByDateProperty().ToList();
-            
             var persistedData = repoService.GetItemList<T>(year);
             var pkdPersistedData = objectPacker.Pack<T, HasIdDate>(persistedData);
 
-            if (IsDataCorrupted(pkdOrderedSheetData, pkdPersistedData))
+            if (IsDataCorrupted(pkdSheetData, pkdPersistedData))
             {
                 return;
             }
 
-            var (mergedData, mergeInfo) = MergeData(pkdOrderedSheetData, pkdPersistedData);
+            var (mergedData, mergeInfo) = MergeData(pkdSheetData, pkdPersistedData);
 
-            if (mergeInfo.Counts.CountOfPersistedMore > 0 ||
-                mergeInfo.Counts.CountOfSheetMore > 0 ||
-                mergeInfo.Counts.CountOfUpdate > 0)
+            if (mergeInfo.Counts.PersistedMore > 0 ||
+                mergeInfo.Counts.SheetMore > 0 ||
+                mergeInfo.Counts.Update > 0)
             {
                 CheckDistinctIds(mergedData.Select(x => x.Target));
-                var persitedDataToSave = mergedData.Select(x => x.Source);
-                var sheetDataToSave = ToIListOfIList(mergedData);
+                var sortedMergedData = mergedData.OrderByDateId().ToList();
+                var persitedDataToSave = sortedMergedData.Select(x => x.Source);
+                var sheetDataToSave = ToIListOfIList(sortedMergedData);
 
                 var yamlResult = repoService.SaveItemList<T>(persitedDataToSave, year);
 
                 var headerNames = GetPropertyNames(typeof(T));
-                var sheetToUpdate = info.GetSheetData(typeof(T));
+                var sheetToUpdate = sheetGroup.Get(typeof(T));
                 //var formulas = GetFormulas(typeof(T));
 
-                //googleSheetService.Worker.PasteDataToSheet(
-                //sheetToUpdate.SpreadSheetId,
-                //sheetToUpdate.SheetTabName,
-                //dataToSave,
-                //headerNames);
+                googleSheetService.Worker.PasteDataToSheet(
+                    sheetToUpdate.SpreadSheetId,
+                    sheetToUpdate.SheetTabName,
+                    sheetDataToSave,
+                    headerNames);
             }
         }
 
@@ -245,12 +258,6 @@ namespace GameSynchCoreProj
             var result = inputList.Select(x => ToIList(x.Source)).ToList();
             return result;
         }
-
-        //public  IList<IList<object>> ToIListQIList<T>(IList<T> inputList) where T: class
-        //{
-        //    var result = inputList.Select(x => ToIList(x)).ToList();
-        //    return result;
-        //}
 
         public IList<object> ToIList(object obj)
         {
@@ -388,7 +395,7 @@ namespace GameSynchCoreProj
             var nameSpaceName = GetType().Namespace;
             var assembly = GetType().Assembly;
             var gg = GetEmbeddedResource(nameSpaceName, embededFileName, assembly);
-            var tmp2 = yamlSerializerSharp.Deserialize<Dictionary<object, object>>(gg);
+            var tmp2 = fileService.Yaml.Custom03.Deserialize<Dictionary<object, object>>(gg);
             var result = tmp2.Select(x => (x.Key.ToString(), x.Value.ToString())).ToList();
             return result;
         }
@@ -450,7 +457,7 @@ namespace GameSynchCoreProj
             return result;
         }
 
-        private List<T> GetExcelSheetData<T>(SheetData sheetData) where T : class
+        private List<T> GetExcelSheetData<T>(SheetInfo sheetData) where T : class
         {
             var sheetListOfList = googleSheetService.Worker
                 .GetSheetData(sheetData.SpreadSheetId, sheetData.SheetId, sheetData.DataRange);

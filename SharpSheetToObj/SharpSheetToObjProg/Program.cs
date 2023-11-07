@@ -6,8 +6,8 @@ namespace GameSynchCoreProj
     {
         static void Main(string[] args)
         {
-            var argsManager = new ArgsManager();
-            argsManager.Resolve(args);
+            //var argsManager = new ArgsManager();
+            //argsManager.Resolve(args);
             Console.WriteLine("Finish And Close");
         }
 

@@ -1,5 +1,4 @@
-﻿using CSharpGameSynchProg.Info;
-using SharpSheetToObjProg.HasProperty;
+﻿using SharpSheetToObjProg.HasProperty;
 
 namespace SharpSheetToObjProg.Merge
 {

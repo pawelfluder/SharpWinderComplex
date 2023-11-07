@@ -2,12 +2,12 @@
 {
     internal class MergeCount
     {
-        public int CountOfPersistedData { get; }
-        public int CountOfSheetData { get; }
-        public int CountOfPersistedMore { get; }
-        public int CountOfSheetMore { get; }
-        public int CountOfSame { get; }
-        public int CountOfUpdate { get; }
+        public int PersistedData { get; }
+        public int SheetData { get; }
+        public int PersistedMore { get; }
+        public int SheetMore { get; }
+        public int Same { get; }
+        public int Update { get; }
 
         //public int CountOfExistedData { get; }
         //public int CountOfAllToSaveData { get; }
@@ -20,12 +20,12 @@
            int countOfSame,
            int countOfUpdate)
         {
-            CountOfPersistedData = countOfPersistedData;
-            CountOfSheetData = countOfSheetData;
-            CountOfPersistedMore = countOfPersistedMore;
-            CountOfSheetMore = countOfSheetMore;
-            CountOfSame = countOfSame;
-            CountOfUpdate = countOfUpdate;
+            PersistedData = countOfPersistedData;
+            SheetData = countOfSheetData;
+            PersistedMore = countOfPersistedMore;
+            SheetMore = countOfSheetMore;
+            Same = countOfSame;
+            Update = countOfUpdate;
             //CountOfExistedData = countOfExistedData;
             //CountOfAllToSaveData = countOfAllToSaveData;
         }
