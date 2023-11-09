@@ -31,15 +31,14 @@ namespace SharpCryptoCalcProg
         public void Sync()
         {
             var transactionsSheet = sheetGroup.Get<Transactions>();
+            var balanceSheet = sheetGroup.Get<Balances>();
+            var accountsSheet = sheetGroup.Get<Accounts>();
 
             synchService.SyncSheet<BinanceConvert>(transactionsSheet.Names);
             synchService.SyncSheet<BinanceTransaction>(transactionsSheet.Names);
             synchService.SyncSheet<BinanceWithdraw>(transactionsSheet.Names);
             synchService.SyncSheet<Balances>(transactionsSheet.Names);
             synchService.SyncSheet<Accounts>(transactionsSheet.Names);
-
-            var balanceSheet = sheetGroup.Get<Balances>();
-            var accountsSheet = sheetGroup.Get<Accounts>();
 
             synchService.SyncSheet<Transactions>(transactionsSheet.Names);
             var transactionsList = repoService.GetItemList<Transactions>(transactionsSheet.Names);

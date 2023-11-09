@@ -4,19 +4,20 @@ using SharpSheetToObjProg.HasProperty;
 namespace SharpSheetToObjProg.CorrectnessCheck
 {
     public class PkdObjComparer<T1, T2> : IComparer<PkdObj<T1, T2>>
-        where T1 : class
-        where T2 : class
     {
         private readonly IFileService fileService;
+        private string[] propNames;
+        private Type propNamesType;
 
         public PkdObjComparer(IFileService fileService)
         {
             this.fileService = fileService;
         }
 
-        public int Compare(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
+        public int Compare(PkdObj<T1, T2> x, PkdObj<T1, T2> y)
         {
-            var propNames = fileService.Reflection.GetPropNames<T2>();
+            GetPropNames01<T2>();
+            
             int? idNumber = null;
             int? dateNumber = null;
             int? nameNumber = null;
@@ -51,10 +52,22 @@ namespace SharpSheetToObjProg.CorrectnessCheck
             if (nameNumber != null &&
                 nameNumber != 0)
             {
-                return (int)idNumber;
+                return (int)nameNumber;
             }
 
             return 0;
+        }
+
+        private string[] GetPropNames01<T>()
+        {
+            if (propNamesType != typeof(T))
+            {
+                propNames = fileService.Reflection.GetPropNames<T2>().ToArray();
+                propNamesType = typeof(T);
+                return propNames;
+            }
+
+            return propNames;
         }
 
         private int? CompareDate(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
@@ -100,5 +113,7 @@ namespace SharpSheetToObjProg.CorrectnessCheck
 
             return -1;
         }
+
+        
     }
 }

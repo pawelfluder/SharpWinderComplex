@@ -103,8 +103,14 @@ namespace SharpSheetToObjProg.Service
             where T1 : class
             where T2 : class
         {
-            CheckDistinctIds(sheetData.Select(x => (IHasId)x.Target));
-            CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
+            if (HasId<T1>())
+            {
+                CheckDistinctIds(sheetData.Select(x => (IHasId)x.Target));
+            }
+            if (HasId<T2>())
+            {
+                CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
+            }
 
             MergeInfo<T1, T2> mergeInfo = new MergeInfo<T1, T2>(persistedData, sheetData);
             var merge = GetMerge<T1, T2>(mergeInfo);
@@ -296,12 +302,16 @@ namespace SharpSheetToObjProg.Service
                 return false;
             }
 
-            var distictIds = CheckDistinctIds(pkdSheetData
-                .Select(x => (IHasId)x.Target));
+            if (HasId<T1>())
+            {
+                var success3 = CheckDistinctIds(pkdSheetData
+                    .Select(x => (IHasId)x.Target));
+                if (!success3) return false;
+            }
+            
             var allPropertiesAreNotNull = AllPropertiesAreNotNull(pkdSheetData);
 
-            var dataNotCorrupted = distictIds & allPropertiesAreNotNull;
-            return dataNotCorrupted;
+            return allPropertiesAreNotNull;
         }
 
         public bool AllPropertiesAreNotNull_InFirstData(ref IEnumerable<IHasId> objList)
@@ -353,25 +363,26 @@ namespace SharpSheetToObjProg.Service
             CheckDistinctIds<T>(
                 IEnumerable<T> data)
         {
-            bool result = false;
-            var distinctList = data.EDistinctBy(x => ((IHasId)x).Id).ToList();
-            result = data.Count() == distinctList.Count();
-
-            var duplicates = data.GroupBy(x => ((IHasId)x).Id)
-              .Where(g => g.Count() > 1)
-              .Select(y => y.Key)
-              .ToList();
-
-            if (duplicates.Any())
+            if (HasId<T>())
             {
-                Console.WriteLine("Error - duplicated ids in excel sheet:");
-                foreach (var dup in duplicates)
-                {
-                    Console.WriteLine(dup);
-                }
+                var distinctList = data.EDistinctBy(x => ((IHasId)x).Id).ToList();
+                var result = data.Count() == distinctList.Count();
+                var duplicates = data.GroupBy(x => ((IHasId)x).Id)
+                  .Where(g => g.Count() > 1)
+                  .Select(y => y.Key)
+                  .ToList();
 
-                //throw new Exception();
-                return false;
+                if (duplicates.Any())
+                {
+                    Console.WriteLine("Error - duplicated ids in excel sheet:");
+                    foreach (var dup in duplicates)
+                    {
+                        Console.WriteLine(dup);
+                    }
+
+                    //throw new Exception();
+                    return false;
+                }
             }
 
             return true;

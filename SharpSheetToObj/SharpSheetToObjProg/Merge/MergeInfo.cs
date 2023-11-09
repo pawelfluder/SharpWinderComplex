@@ -1,9 +1,17 @@
-﻿using SharpSheetToObjProg.HasProperty;
+﻿using CSharpGameSynchProg.Register;
+using SharpFileServiceProg.Service;
+using SharpSheetToObjProg.CorrectnessCheck;
+using SharpSheetToObjProg.HasProperty;
+using System;
 
 namespace SharpSheetToObjProg.Merge
 {
-    internal class MergeInfo<T1, T2> where T1 : class
+    internal class MergeInfo<T1, T2>
+        where T1 : class
+        where T2 : class
     {
+        private readonly IFileService fileService;
+
         public IEnumerable<PkdObj<T1, T2>> SheetMore { get; private set; }
         public IEnumerable<PkdObj<T1, T2>> PersitedMore { get; private set; }
         public IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)> SameTuple { get; private set; }
@@ -16,9 +24,18 @@ namespace SharpSheetToObjProg.Merge
             IEnumerable<PkdObj<T1, T2>> persistedData,
             IEnumerable<PkdObj<T1, T2>> sheetData)
         {
+            fileService = MyBorder.Container.Resolve<IFileService>();
             SetCollections(persistedData, sheetData);
             SetCounts(persistedData, sheetData);
-            SetIds(persistedData, sheetData);
+            if (HasId<T1>())
+            {
+                SetIds(persistedData, sheetData);
+            }
+        }
+
+        private bool HasId<T>()
+        {
+            return fileService.Reflection.HasProp<T>("Id");
         }
 
         private void SetCounts(
@@ -51,6 +68,9 @@ namespace SharpSheetToObjProg.Merge
             IEnumerable<PkdObj<T1, T2>> persistedData,
             IEnumerable<PkdObj<T1, T2>> sheetData)
         {
+            var selector = GetKeySelector<T2>();
+            //var gg = y => ((IHasId)y).Id == ((IHasId)x1.Target).Id));
+
             SheetMore = sheetData
                 .Where(x1 => !(persistedData
                 .Select(x2 => x2.Target)
@@ -64,13 +84,35 @@ namespace SharpSheetToObjProg.Merge
             //SameTuple = CompareLists(
             //    sheetData,
             //    persistedData);
+            
 
             SameTuple = CompareLists2(
                 sheetData,
                 persistedData,
-                x => ((IHasId)x.Target).Id);
+                GetKeySelector<T2>());
 
             UpdateTuple = FindDiffrentProperties(SameTuple);
+        }
+
+        private Func<PkdObj<T1, T2>, string> GetKeySelector<T>()
+        {
+            Func<PkdObj<T1, T2>, string> keySelector;
+            if (typeof(T2).GetInterface(nameof(IHasId)) != null)
+            {
+                keySelector = x => ((IHasId)x.Target).Id;
+                return keySelector;
+            }
+            if (typeof(T2).GetInterface(nameof(IHasDate)) != null)
+            {
+                keySelector = x => ((IHasDate)x.Target).Date;
+                return keySelector;
+            }
+            if (typeof(T2).GetInterface(nameof(IHasName)) != null)
+            {
+                keySelector = x => ((IHasName)x.Target).Name;
+                return keySelector;
+            }
+            return null;
         }
 
         public IEnumerable<(T, T)> CompareLists2<T, TKey>(IEnumerable<T> list1, IEnumerable<T> list2, Func<T, TKey> keySelector)
@@ -104,7 +146,11 @@ namespace SharpSheetToObjProg.Merge
             return result;
         }
 
-        public List<Tuple<T, T>> CompareLists2<T, TKey>(List<T> list1, List<T> list2, Func<T, TKey> keySelector)
+        public List<Tuple<T, T>>
+            CompareLists2<T, TKey>(
+                List<T> list1,
+                List<T> list2,
+                Func<T, TKey> keySelector)
         {
             var commonElements = list1
                 .Join(list2, keySelector, keySelector, (item1, item2) => Tuple.Create(item1, item2))
@@ -113,52 +159,57 @@ namespace SharpSheetToObjProg.Merge
             return commonElements;
         }
 
-        private IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)>
-            FindDiffrentProperties<T>(
-            IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)> sameTuple)
-            where T : class
+        private IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)>
+            FindDiffrentProperties(
+                IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)> sameTuple)
         {
-            var result = new List<(PkdObj<T, T2>, PkdObj<T, T2>)>();
+            var result = new List<(PkdObj<T1, T2>, PkdObj<T1, T2>)>();
 
             foreach (var item in sameTuple)
             {
-                if (!Equals(item.Item1.Source, item.Item2.Source))
+                var pkdObjEqual = new PkdObjEqualBySource<T1, T2>(fileService);
+                if (!pkdObjEqual.Equal(item.Item1, item.Item2))
                 {
                     result.Add(item);
                 }
+
+                //if (!Equals(item.Item1.Source, item.Item2.Source))
+                //{
+                //    result.Add(item);
+                //}
             }
 
             return result;
         }
 
-        public bool Equals(object obj01, object obj02)
-        {
-            var thisTuples = GetTuples(obj02);
-            var objTuples = GetTuples(obj01);
+        //public bool Equals(object obj01, object obj02)
+        //{
+        //    var thisTuples = GetTuples(obj02);
+        //    var objTuples = GetTuples(obj01);
 
-            if (thisTuples.Length != objTuples.Length)
-            {
-                return false;
-            }
+        //    if (thisTuples.Length != objTuples.Length)
+        //    {
+        //        return false;
+        //    }
 
-            for (int i = 0; i < thisTuples.Length; i++)
-            {
-                var tuple01 = thisTuples[i];
-                var tuple02 = objTuples[i];
-                if (tuple01 != tuple02)
-                {
-                    return false;
-                }
-            }
+        //    for (int i = 0; i < thisTuples.Length; i++)
+        //    {
+        //        var tuple01 = thisTuples[i];
+        //        var tuple02 = objTuples[i];
+        //        if (tuple01 != tuple02)
+        //        {
+        //            return false;
+        //        }
+        //    }
 
-            return true;
-        }
+        //    return true;
+        //}
 
-        public (string, string)[] GetTuples(object obj)
-        {
-            var properties = obj.GetType().GetProperties();
-            var tuples = properties.Select(x => (x.Name, x.GetValue(obj).ToString())).ToArray();
-            return tuples;
-        }
+        //public (string, string)[] GetTuples(object obj)
+        //{
+        //    var properties = obj.GetType().GetProperties();
+        //    var tuples = properties.Select(x => (x.Name, x.GetValue(obj).ToString())).ToArray();
+        //    return tuples;
+        //}
     }
 }
