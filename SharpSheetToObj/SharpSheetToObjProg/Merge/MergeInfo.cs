@@ -2,19 +2,19 @@
 
 namespace SharpSheetToObjProg.Merge
 {
-    internal class MergeInfo<T> where T : class
+    internal class MergeInfo<T1, T2> where T1 : class
     {
-        public IEnumerable<PkdObj<T, HasIdDate>> SheetMore { get; private set; }
-        public IEnumerable<PkdObj<T, HasIdDate>> PersitedMore { get; private set; }
-        public IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)> SameTuple { get; private set; }
-        public IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)> UpdateTuple { get; private set; }
+        public IEnumerable<PkdObj<T1, T2>> SheetMore { get; private set; }
+        public IEnumerable<PkdObj<T1, T2>> PersitedMore { get; private set; }
+        public IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)> SameTuple { get; private set; }
+        public IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)> UpdateTuple { get; private set; }
         public MergeCount Counts { get; private set; }
         public MergeIds mergeIds { get; private set; }
         public MergeIds Ids { get; private set; }
 
         public MergeInfo(
-            IEnumerable<PkdObj<T, HasIdDate>> persistedData,
-            IEnumerable<PkdObj<T, HasIdDate>> sheetData)
+            IEnumerable<PkdObj<T1, T2>> persistedData,
+            IEnumerable<PkdObj<T1, T2>> sheetData)
         {
             SetCollections(persistedData, sheetData);
             SetCounts(persistedData, sheetData);
@@ -22,8 +22,8 @@ namespace SharpSheetToObjProg.Merge
         }
 
         private void SetCounts(
-            IEnumerable<PkdObj<T, HasIdDate>> persistedData,
-            IEnumerable<PkdObj<T, HasIdDate>> sheetData)
+            IEnumerable<PkdObj<T1, T2>> persistedData,
+            IEnumerable<PkdObj<T1, T2>> sheetData)
         {
             Counts = new MergeCount(
                persistedData.Count(),
@@ -35,31 +35,31 @@ namespace SharpSheetToObjProg.Merge
         }
 
         private void SetIds(
-            IEnumerable<PkdObj<T, HasIdDate>> persistedData,
-            IEnumerable<PkdObj<T, HasIdDate>> sheetData)
+            IEnumerable<PkdObj<T1, T2>> persistedData,
+            IEnumerable<PkdObj<T1, T2>> sheetData)
         {
             Ids = new MergeIds(
-               persistedData.Select(x => x.Target.Id).ToList(),
-               sheetData.Select(x => x.Target.Id).ToList(),
-               PersitedMore.Select(x => x.Target.Id).ToList(),
-               SheetMore.Select(x => x.Target.Id).ToList(),
-               SameTuple.Select(x => x.Item1.Target.Id).ToList(),
-               UpdateTuple.Select(x => x.Item1.Target.Id).ToList());
+               persistedData.Select(x => ((IHasId)x.Target).Id).ToList(),
+               sheetData.Select(x => ((IHasId)x.Target).Id).ToList(),
+               PersitedMore.Select(x => ((IHasId)x.Target).Id).ToList(),
+               SheetMore.Select(x => ((IHasId)x.Target).Id).ToList(),
+               SameTuple.Select(x => ((IHasId)x.Item1.Target).Id).ToList(),
+               UpdateTuple.Select(x => ((IHasId)x.Item1.Target).Id).ToList());
         }
 
         private void SetCollections(
-            IEnumerable<PkdObj<T, HasIdDate>> persistedData,
-            IEnumerable<PkdObj<T, HasIdDate>> sheetData)
+            IEnumerable<PkdObj<T1, T2>> persistedData,
+            IEnumerable<PkdObj<T1, T2>> sheetData)
         {
             SheetMore = sheetData
                 .Where(x1 => !(persistedData
                 .Select(x2 => x2.Target)
-                .Any(y => y.Id == x1.Target.Id)));
+                .Any(y => ((IHasId)y).Id == ((IHasId)x1.Target).Id)));
 
             PersitedMore = persistedData
                 .Where(x1 => !(sheetData
                 .Select(x2 => x2.Target)
-                .Any(y => y.Id == x1.Target.Id)));
+                .Any(y => ((IHasId)y).Id == ((IHasId)x1.Target).Id)));
 
             //SameTuple = CompareLists(
             //    sheetData,
@@ -68,7 +68,7 @@ namespace SharpSheetToObjProg.Merge
             SameTuple = CompareLists2(
                 sheetData,
                 persistedData,
-                x => x.Target.Id);
+                x => ((IHasId)x.Target).Id);
 
             UpdateTuple = FindDiffrentProperties(SameTuple);
         }
@@ -82,12 +82,12 @@ namespace SharpSheetToObjProg.Merge
             return commonElements;
         }
 
-        public IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>
+        public IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)>
             CompareLists<T>(
-            IEnumerable<PkdObj<T, HasIdDate>> list1,
-            IEnumerable<PkdObj<T, HasIdDate>> list2)
+            IEnumerable<PkdObj<T, T2>> list1,
+            IEnumerable<PkdObj<T, T2>> list2)
         {
-            var result = new List<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>();
+            var result = new List<(PkdObj<T, T2>, PkdObj<T, T2>)>();
             var count = list1.Count();
 
             for (int i = 0; i < count; i++)
@@ -95,7 +95,7 @@ namespace SharpSheetToObjProg.Merge
                 var item1 = list1.ElementAt(i);
                 var item2 = list2.ElementAt(i);
 
-                if (item1.Target.Id == item2.Target.Id)
+                if (((IHasId)item1.Target).Id == ((IHasId)item2.Target).Id)
                 {
                     result.Add((item1, item2));
                 }
@@ -113,12 +113,12 @@ namespace SharpSheetToObjProg.Merge
             return commonElements;
         }
 
-        private IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>
+        private IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)>
             FindDiffrentProperties<T>(
-            IEnumerable<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)> sameTuple)
+            IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)> sameTuple)
             where T : class
         {
-            var result = new List<(PkdObj<T, HasIdDate>, PkdObj<T, HasIdDate>)>();
+            var result = new List<(PkdObj<T, T2>, PkdObj<T, T2>)>();
 
             foreach (var item in sameTuple)
             {

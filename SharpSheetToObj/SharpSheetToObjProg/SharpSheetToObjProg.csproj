@@ -40,7 +40,6 @@
 
   <ItemGroup>
     <Folder Include="AAPublic\" />
-    <Folder Include="Move\" />
     <Folder Include="NewFolder\" />
   </ItemGroup>
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace CSharpGameSynchProg.Contracts
+namespace SharpSheetToObjProg.CorrectnessCheck
 {
     public class CommonObject
     {

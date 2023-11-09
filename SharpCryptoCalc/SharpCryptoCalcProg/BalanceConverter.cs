@@ -4,29 +4,32 @@ namespace SharpCryptoCalcProg
 {
     internal class BalanceConverter
     {
-        private Dictionary<string, decimal> accountsDict;
+        private List<Accounts> accountsList;
 
         public BalanceConverter()
         {
-            accountsDict = new Dictionary<string, decimal>();
+            accountsList = new List<Accounts>();
         }
 
         public void Convert(
             IEnumerable<Transactions> inputList,
-            out List<Balance> orderedBalanceList,
-            out Dictionary<string, decimal> accountsDict)
+            out List<Balances> outBalanceList,
+            out List<Accounts> outAccountsList)
         {
-            accountsDict = new Dictionary<string, Account>();
-            var balanceList = new List<Balance>();
+            var balanceList = new List<Balances>();
             var orderedList = inputList.OrderBy(x => x.Id);
 
             foreach (var tra in orderedList)
             {
                 AddTransaction(tra.From, "-" + tra.FromSend);
                 AddTransaction(tra.To, tra.ToReceived);
-                var frombalance = accountsDict[tra.From].ToString().Replace('.', ',');
-                var tobalance = accountsDict[tra.To].ToString().Replace('.', ',');
-                var balance = new Balance()
+                var frombalance = accountsList
+                    .Single(x => x.Name == tra.From)
+                    .Balance.ToString().Replace('.', ',');
+                var tobalance = accountsList
+                    .Single(x => x.Name == tra.To)
+                    .Balance.ToString().Replace('.', ',');
+                var balance = new Balances()
                 {
                     Id = tra.Id,
                     Date = tra.Date,
@@ -43,24 +46,27 @@ namespace SharpCryptoCalcProg
                 balanceList.Add(balance);
             }
 
-            orderedBalanceList = balanceList.OrderByDescending(x => x.Id).ToList();
+            outBalanceList = balanceList.OrderByDescending(x => x.Id).ToList();
+            outAccountsList = new List<Accounts>(accountsList);
+            accountsList.Clear();
         }
 
         private void AddTransaction(
             string accountName,
             string valueString)
         {
-            var value = decimal.Parse(valueString.Replace(',','.'));
-            
-            if (!accountsDict.ContainsKey(accountName))
+            var account = accountsList.SingleOrDefault(x => x.Name == accountName);
+            if (account == default)
             {
-                accountsDict.Add(accountName, value);
+                account = new Accounts(accountName, valueString);
+                accountsList.Add(account);
                 return;
             }
 
-            var current = accountsDict[accountName];
-            var sum = current + value;
-            accountsDict[accountName] = sum;
+            var valueToAdd = decimal.Parse(valueString.Replace(',', '.'));
+            var valueCurrent = decimal.Parse(account.Balance.Replace(',', '.'));
+            var sum = valueCurrent + valueToAdd;
+            account.Balance = sum.ToString();
         }
     }
 }

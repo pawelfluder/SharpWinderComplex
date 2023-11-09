@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGoogleDriveProg", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpSetupProg21Private", "..\..\..\23_projects\SharpSetup21\SharpSetupProg21Private\SharpSetupProg21Private.csproj", "{458795E9-BC16-48B1-AE78-A822188488AD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpFileServiceProg", "..\..\..\03_projects\SharpFileService\SharpFileServiceProg\SharpFileServiceProg.csproj", "{3B4B27D6-FD05-4E6B-A1DB-C55C6E186F91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{458795E9-BC16-48B1-AE78-A822188488AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{458795E9-BC16-48B1-AE78-A822188488AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{458795E9-BC16-48B1-AE78-A822188488AD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B4B27D6-FD05-4E6B-A1DB-C55C6E186F91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B4B27D6-FD05-4E6B-A1DB-C55C6E186F91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B4B27D6-FD05-4E6B-A1DB-C55C6E186F91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B4B27D6-FD05-4E6B-A1DB-C55C6E186F91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

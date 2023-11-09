@@ -34,16 +34,21 @@ namespace SharpCryptoCalcProg.Info
             dictionary = new Dictionary<Type, SheetInfo>();
             this.cache = cache;
             Add<Transactions>();
+            Add<Balances>();
+            Add<Accounts>();
+            Add<BinanceConvert>();
+            Add<BinanceTransaction>();
+            Add<BinanceWithdraw>();
             Register(registerMethod);
         }
 
-        public SheetInfoGroup(
-            SheetInfoCache cache)
-        {
-            dictionary = new Dictionary<Type, SheetInfo>();
-            this.cache = cache;
-            Add<Transactions>();
-        }
+        //public SheetInfoGroup(
+        //    SheetInfoCache cache)
+        //{
+        //    dictionary = new Dictionary<Type, SheetInfo>();
+        //    this.cache = cache;
+        //    Add<Transactions>();
+        //}
 
         public void Register(
             Action<Type, string, string, string, string> registerMethod)

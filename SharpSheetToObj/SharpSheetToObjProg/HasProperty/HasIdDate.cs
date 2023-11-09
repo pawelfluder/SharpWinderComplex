@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharpSheetToObjProg.HasProperty
+﻿namespace SharpSheetToObjProg.HasProperty
 {
-    public class HasId : IHasId
+    public class T2 : IHasId
     {
         public string Id { get; set; }
+        public string Date { get; set; }
 
-        public HasId(string id)
+        public T2(
+            string id,
+            string date)
         {
             this.Id = id;
+            this.Date = date;
         }
     }
 }

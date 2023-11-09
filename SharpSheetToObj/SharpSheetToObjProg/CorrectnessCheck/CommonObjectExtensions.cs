@@ -1,10 +1,4 @@
-﻿using CommonTypesCoreProj.Contracts;
-using CSharpGameSynchProg.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace CSharpGameSynchProg.Extensions
+﻿namespace SharpSheetToObjProg.CorrectnessCheck
 {
     public static class CommonObjectExtensions
     {

@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using SharpYaml.Serialization;
-using CSharpGameSynchProg.Extensions;
 using SharpGoogleDocsProg.AAPublic;
 using CSharpGameSynchProg.Register;
 using SharpGoogleDriveProg.AAPublic;
@@ -8,12 +6,13 @@ using SharpGoogleSheetProg.AAPublic;
 using SharpFileServiceProg.Service;
 using SharpRepoServiceProg.Service;
 using SharpSetupProg21Private.AAPublic.Extensions;
-using SharpSheetToObjProg;
 using SharpSheetToObjProg.HasProperty;
 using SharpSheetToObjProg.Merge;
 using SharpSheetToObjProg.Info;
+using GameSynchCoreProj;
+using SharpSheetToObjProg.CorrectnessCheck;
 
-namespace GameSynchCoreProj
+namespace SharpSheetToObjProg.Service
 {
     public class SychService
     {
@@ -22,19 +21,20 @@ namespace GameSynchCoreProj
         private IGoogleSheetService googleSheetService;
         private SheetInfoGroup sheetGroup;
         private MessagesWorker messagesWorker;
+        private readonly ObjectPacker objectPacker;
         private readonly IFileService fileService;
         private readonly IRepoService repoService;
 
         public SychService()
         {
-            this.sheetGroup = new SheetInfoGroup();
+            sheetGroup = new SheetInfoGroup();
             googleDocsService = MyBorder.Container.Resolve<IGoogleDocsService>();
             googleDriveService = MyBorder.Container.Resolve<IGoogleDriveService>();
             googleSheetService = MyBorder.Container.Resolve<IGoogleSheetService>();
             fileService = MyBorder.Container.Resolve<IFileService>();
             repoService = MyBorder.Container.Resolve<IRepoService>();
-            //SetSheetsIdsForInfo();
             messagesWorker = new MessagesWorker();
+            objectPacker = new ObjectPacker();
         }
 
         //public void RegisterSheet<T>(
@@ -56,41 +56,39 @@ namespace GameSynchCoreProj
             sheetGroup.Add(type, sheetInfo);
         }
 
-        //private void SetSheetsIdsForInfo()
-        //{
-        //    var yearFolder = googleDriveService.Worker
-        //        .GetFolderByNameAndId(info.BaseFolder.Name, info.BaseFolder.Id);
-
-        //    var sheetFiles = sheetCache.GetCache();
-
-        //    //var sheetFiles = googleDriveService.Worker
-        //    //    .GetFilesRequest($"'{yearFolder.Id}' in parents and mimeType='application/vnd.google-apps.spreadsheet'");
-        //    var names = sheetFiles.Select(x => x.Name);
-
-        //    var sheetInfos = info.GetAllSheetData();
-
-        //    foreach (var sheetInfo in sheetInfos)
-        //    {
-        //        try
-        //        {
-        //            var spreadSheetId = sheetFiles.Single(x => x.Name == sheetInfo.SheetTabName).Id;
-        //            var spreadSheet = googleSheetService.Worker.GetSpreadsheet(spreadSheetId);
-        //            var sheet = spreadSheet.Sheets.SingleOrDefault(x => x.Properties.Title == sheetInfo.SheetTabName);
-        //            var sheetId = sheet.Properties.SheetId.ToString();
-        //            sheetInfo.SetIds(spreadSheetId, sheetId);
-        //        }
-        //        catch { }
-        //    }
-        //}
-
-        public void SyncSheet<T>(params string[] names) where T : class
+        public void SyncSheet<T1>(params string[] names) where T1 : class
         {
-            var hasId = true;
-            if (hasId)
+            if (HasIdDate<T1>())
             {
-                SynchIdDataObjects<T>(names);
+                SynchObjects<T1, HasId>(names);
                 return;
             }
+
+            if (HasName<T1>())
+            {
+                SynchObjects<T1, HasName>(names);
+                return;
+            }
+        }
+
+        private bool HasIdDate<T>()
+        {
+            return fileService.Reflection.HasProp<T>("Id", "Date");
+        }
+
+        private bool HasId<T>()
+        {
+            return fileService.Reflection.HasProp<T>("Id");
+        }
+
+        private bool HasDate<T>()
+        {
+            return fileService.Reflection.HasProp<T>("Date");
+        }
+
+        private bool HasName<T>()
+        {
+            return fileService.Reflection.HasProp<T>("Name");
         }
 
         private void PrintInfo(string from, string to)
@@ -98,53 +96,26 @@ namespace GameSynchCoreProj
             Console.WriteLine("From " + from + " To " + to);
         }
 
-        //private void SynchForCommonObjects<T>() where T : CommonObject
-        //{
-        //    var sheetData = info.GetSheetData(typeof(T));
-        //    PrintInfo(sheetData.FileName + " " + sheetData.CopySheetTabName, sheetData.PersistencyName);
-        //    var excelSheetData = GetExcelSheetData<T>(sheetData).ToList();
-
-        //    //if (typeof(IHasDate).IsAssignableFrom(typeof(T)))
-        //    //{
-        //    //    excelSheetData = excelSheetData.OrderByDateProperty();
-        //    //}
-
-        //    var mainAdrTuple = ("Persistency", "03");
-        //    var year = "2022";
-
-        //    //var approachesAdrTuple = repoService
-        //    //    .GetItemList<Approaches>(year);
-
-        //    //var persistedData = persistency.GetData<List<T>>(sheetData.PersistedIndexes);
-
-        //    //if (IsDataCorrupted(excelSheetData, persistedData))
-        //    //{
-        //    //    return;
-        //    //}
-
-        //    if (true)
-        //    {
-        //        //string yamlResult = persistency.Serialize(excelSheetData);
-        //        //persistency.SaveData(sheetData.PersistedIndexes, excelSheetData);
-        //    }
-        //}
-
-        private (IEnumerable<PkdObj<T, HasIdDate>> mergedData, MergeInfo<T> changesInfo)
-            MergeData<T>(
-                IEnumerable<PkdObj<T, HasIdDate>> sheetData,
-                IEnumerable<PkdObj<T, HasIdDate>> persistedData) where T : class
+        private (IEnumerable<PkdObj<T1, T2>> mergedData, MergeInfo<T1, T2> changesInfo)
+            MergeData<T1, T2>(
+                IEnumerable<PkdObj<T1, T2>> sheetData,
+                IEnumerable<PkdObj<T1, T2>> persistedData)
+            where T1 : class
+            where T2 : class
         {
             CheckDistinctIds(sheetData.Select(x => (IHasId)x.Target));
             CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
 
-            MergeInfo<T> mergeInfo = new MergeInfo<T>(persistedData, sheetData);
-            var merge = GetMerge(mergeInfo);
+            MergeInfo<T1, T2> mergeInfo = new MergeInfo<T1, T2>(persistedData, sheetData);
+            var merge = GetMerge<T1, T2>(mergeInfo);
 
             return (merge, mergeInfo);
         }
 
-        private IEnumerable<PkdObj<T, HasIdDate>>
-            GetMerge<T>(MergeInfo<T> mergeInfo) where T : class
+        private IEnumerable<PkdObj<T1, T2>>
+            GetMerge<T1, T2>(MergeInfo<T1, T2> mergeInfo)
+            where T1 : class
+            where T2 : class
         {
             var merge = mergeInfo.SheetMore
                 .Concat(mergeInfo.SameTuple.Select(x => x.Item1));
@@ -158,13 +129,13 @@ namespace GameSynchCoreProj
             return merge;
         }
 
-        private bool IsDataCorrupted<T>(
-            IEnumerable<PkdObj<T, HasIdDate>> sheetData,
-            IEnumerable<PkdObj<T, HasIdDate>> persistedData) where T: class
+        private bool IsDataCorrupted<T1, T2>(
+            IEnumerable<PkdObj<T1, T2>> sheetData,
+            IEnumerable<PkdObj<T1, T2>> persistedData) where T1 : class
         {
-            var genericType = typeof(T);
-            var gg = typeof(T).GetInterfaces();
-            var baseType = typeof(T).BaseType.Name;
+            var genericType = typeof(T1);
+            var gg = typeof(T1).GetInterfaces();
+            var baseType = typeof(T1).BaseType.Name;
 
             //var type2 = typeof(CommonIdObject).Name;
             //var type1 = typeof(CommonObject).Name;
@@ -208,25 +179,17 @@ namespace GameSynchCoreProj
             return false;
         }
 
-        private void SynchIdDataObjects<T>(params string[] names) where T : class
+        private void SynchObjects<T1, T2>(string[] names)
+            where T1 : class
+            where T2 : class
         {
-            var year = names[0]; // "2022";
-            var sheetData = sheetGroup.Get(typeof(T));
-            List<T> excelSheetData = GetExcelSheetData<T>(sheetData);
+            var sheetInfo = sheetGroup.Get(typeof(T1));
+            var excelSheetData = GetExcelSheetData<T1>(sheetInfo);
+            var persistedData = repoService.GetItemList<T1>(names);
 
-            var objectPacker = new ObjectPacker();
-            var pkdSheetData = objectPacker.Pack<T, HasIdDate>(excelSheetData);
-
-            var gg = AllDataChecks(pkdSheetData);
-            if (!AllPropertiesAreNotNull(pkdSheetData.First())) { pkdSheetData = pkdSheetData.Skip(1).ToList(); }
-
-            var persistedData = repoService.GetItemList<T>(year);
-            var pkdPersistedData = objectPacker.Pack<T, HasIdDate>(persistedData);
-
-            if (IsDataCorrupted(pkdSheetData, pkdPersistedData))
-            {
-                return;
-            }
+            var pkdSheetData = objectPacker.Pack<T1, T2>(excelSheetData);
+            var pkdPersistedData = objectPacker.Pack<T1, T2>(persistedData);
+            var success1 = FirstAllDataChecks(pkdSheetData, pkdPersistedData);
 
             var (mergedData, mergeInfo) = MergeData(pkdSheetData, pkdPersistedData);
 
@@ -234,26 +197,38 @@ namespace GameSynchCoreProj
                 mergeInfo.Counts.SheetMore > 0 ||
                 mergeInfo.Counts.Update > 0)
             {
-                CheckDistinctIds(mergedData.Select(x => x.Target));
                 var sortedMergedData = mergedData.OrderByDateId().ToList();
                 var persitedDataToSave = sortedMergedData.Select(x => x.Source);
                 var sheetDataToSave = ToIListOfIList(sortedMergedData);
 
-                var yamlResult = repoService.SaveItemList<T>(persitedDataToSave, year);
+                var success2 = LastAllDataChecks(sortedMergedData);
 
-                var headerNames = GetPropertyNames(typeof(T));
-                var sheetToUpdate = sheetGroup.Get(typeof(T));
-                //var formulas = GetFormulas(typeof(T));
+                var yamlResult = repoService.SaveItemList<T1>(persitedDataToSave, names);
+                var headerNames = fileService.Reflection.GetPropNames<T1>();
 
                 googleSheetService.Worker.PasteDataToSheet(
-                    sheetToUpdate.SpreadSheetId,
-                    sheetToUpdate.SheetTabName,
+                    sheetInfo.SpreadSheetId,
+                    sheetInfo.SheetTabName,
                     sheetDataToSave,
                     headerNames);
             }
         }
 
-        public IList<IList<object>> ToIListOfIList<T>(IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
+        private bool
+            LastAllDataChecks<T1, T2>(
+                List<PkdObj<T1, T2>> mergedData)
+            where T1 : class
+            where T2 : class
+        {
+            var success = CheckDistinctIds(mergedData.Select(x => x.Target));
+            return success;
+        }
+
+        public IList<IList<object>>
+            ToIListOfIList<T1, T2>(
+                IEnumerable<PkdObj<T1, T2>> inputList)
+            where T1 : class
+            where T2 : class
         {
             var result = inputList.Select(x => ToIList(x.Source)).ToList();
             return result;
@@ -293,25 +268,37 @@ namespace GameSynchCoreProj
             return result;
         }
 
-        //public List<T> CastAndAdd2<T>(
-        //    object objThatImplementsMyInterface,
-        //    IList<T> theList)
-        //{
-        //    typeof(T1).
-        //    var tmp1 = (T1)objThatImplementsMyInterface;
-        //    var tmp2 = (T2)tmp1;
-        //    theList.Add();
-        //}
-
         public void CastAndAdd<T>(object objThatImplementsMyInterface, IList<T> theList)
         {
             theList.Add((T)objThatImplementsMyInterface);
         }
 
-        public bool AllDataChecks<T>(IEnumerable<PkdObj<T, HasIdDate>> objList) where T : class
+        public bool FirstAllDataChecks<T1, T2>(
+            List<PkdObj<T1, T2>> pkdSheetData,
+            IEnumerable<PkdObj<T1, T2>> pkdPersistedData)
+            where T1 : class
+            where T2 : class
         {
-            var distictIds = CheckDistinctIds(objList.Select(x => (IHasId)x.Target));
-            var allPropertiesAreNotNull = AllPropertiesAreNotNull(objList);
+            if (pkdSheetData.Count() > 0 &&
+                !AllPropertiesAreNotNull(pkdSheetData.First()))
+            {
+                throw new Exception();
+            }
+
+            if (pkdPersistedData.Count() > 0 &&
+                !AllPropertiesAreNotNull(pkdPersistedData.First()))
+            {
+                throw new Exception();
+            }
+
+            if (IsDataCorrupted(pkdSheetData, pkdPersistedData))
+            {
+                return false;
+            }
+
+            var distictIds = CheckDistinctIds(pkdSheetData
+                .Select(x => (IHasId)x.Target));
+            var allPropertiesAreNotNull = AllPropertiesAreNotNull(pkdSheetData);
 
             var dataNotCorrupted = distictIds & allPropertiesAreNotNull;
             return dataNotCorrupted;
@@ -332,7 +319,7 @@ namespace GameSynchCoreProj
 
         public bool AllPropertiesAreNotNull(IEnumerable<object> objList)
         {
-            var properties = this.GetType().GetProperties();
+            var properties = GetType().GetProperties();
 
             foreach (var obj in objList)
             {
@@ -362,13 +349,15 @@ namespace GameSynchCoreProj
             return true;
         }
 
-        public bool CheckDistinctIds(IEnumerable<IHasId> data)
+        public bool
+            CheckDistinctIds<T>(
+                IEnumerable<T> data)
         {
             bool result = false;
-            var distinctList = data.DistinctBy(x => x.Id).ToList();
-            result = (data.Count() == distinctList.Count());
+            var distinctList = data.EDistinctBy(x => ((IHasId)x).Id).ToList();
+            result = data.Count() == distinctList.Count();
 
-            var duplicates = data.GroupBy(x => x.Id)
+            var duplicates = data.GroupBy(x => ((IHasId)x).Id)
               .Where(g => g.Count() > 1)
               .Select(y => y.Key)
               .ToList();
@@ -414,11 +403,11 @@ namespace GameSynchCoreProj
             return string.Empty;
         }
 
-        private IEnumerable<(bool, PkdObj<T, HasIdDate>)> GetMerge<T>(
-            IEnumerable<PkdObj<T, HasIdDate>> persistedData,
-            IEnumerable<PkdObj<T, HasIdDate>> excelSheetData) where T : class
+        private IEnumerable<(bool, PkdObj<T, T2>)> GetMerge<T>(
+            IEnumerable<PkdObj<T, T2>> persistedData,
+            IEnumerable<PkdObj<T, T2>> excelSheetData) where T : class
         {
-            var result = new List<(bool, PkdObj<T, HasIdDate>)>();
+            var result = new List<(bool, PkdObj<T, T2>)>();
 
             var existedData = excelSheetData.Where(x => persistedData.Any(y => y.Target.Id == x.Target.Id));
             var persistedIds = persistedData.Select(x => x.Target.Id).OrderBy(x => x);
@@ -429,7 +418,7 @@ namespace GameSynchCoreProj
 
             foreach (var sheetItem in existedData)
             {
-                PkdObj<T, HasIdDate> persistedItem = null;
+                PkdObj<T, T2> persistedItem = null;
                 try
                 {
                     persistedItem = persistedData.Single(x => x.Target.Id == sheetItem.Target.Id);

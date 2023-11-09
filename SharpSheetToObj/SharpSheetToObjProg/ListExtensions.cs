@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace GameSynchCoreProj
+﻿namespace GameSynchCoreProj
 {
     public static class ListExtensions
     {
-        public static IEnumerable<TSource> DistinctBy<TSource, TKey>(
+        public static IEnumerable<TSource> EDistinctBy<TSource, TKey>(
             this IEnumerable<TSource> source,
             Func<TSource, TKey> keySelector)
         {

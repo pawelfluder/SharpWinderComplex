@@ -1,4 +1,5 @@
 ﻿using SharpCryptoCalcProg.ASheetObjects;
+using System.Management.Automation.Language;
 
 namespace SharpCryptoCalcProg.Info
 {
@@ -14,28 +15,54 @@ namespace SharpCryptoCalcProg.Info
         public SheetInfo Get<T>()
         {
             var type = typeof(T);
-            var typeName = typeof(T).Name;
             var fileName = "crypto";
             var names = new string[] { fileName };
             if (type == typeof(Transactions))
             {
-                //var (spreadSheetId, name2) = helper.GetFileByName(fileName);
-                //var sheetId = helper.GetSheetId(spreadSheetId, typeName);
                 var spreadSheetId = "1ju5Im_BaQURcmKFhf1rr0hOkDpk_68Lvi8IZ4n_oVSw";
                 var sheetId = "304249276";
                 var sheet = CreateSheet(type, fileName, spreadSheetId, sheetId, names);
                 return sheet;
             }
-            if (type == typeof(Balance))
+            if (type == typeof(Balances))
             {
-                typeName = "Balance";
-                //var (spreadSheetId, name2) = helper.GetFileByName(fileName);
-                //var sheetId = helper.GetSheetId(spreadSheetId, typeName);
                 var spreadSheetId = "1ju5Im_BaQURcmKFhf1rr0hOkDpk_68Lvi8IZ4n_oVSw";
                 var sheetId = "1154582261";
                 var sheet = CreateSheet(type, fileName, spreadSheetId, sheetId, names);
                 return sheet;
             }
+            if (type == typeof(Accounts))
+            {
+                var spreadSheetId = "1ju5Im_BaQURcmKFhf1rr0hOkDpk_68Lvi8IZ4n_oVSw";
+                var sheetId = "304249276";
+                var sheet = CreateSheet(type, fileName, spreadSheetId, sheetId, names);
+                return sheet;
+            }
+            if (type == typeof(BinanceConvert))
+            {
+                var spreadSheetId = "1ju5Im_BaQURcmKFhf1rr0hOkDpk_68Lvi8IZ4n_oVSw";
+                var sheetId = "207106681";
+                var sheet = CreateSheet(type, fileName, spreadSheetId, sheetId, names);
+                return sheet;
+            }
+            if (type == typeof(BinanceTransaction))
+            {
+                var spreadSheetId = "1ju5Im_BaQURcmKFhf1rr0hOkDpk_68Lvi8IZ4n_oVSw";
+                var sheetId = "253108670";
+                var sheet = CreateSheet(type, fileName, spreadSheetId, sheetId, names);
+                return sheet;
+            }
+            if (type == typeof(BinanceWithdraw))
+            {
+                var spreadSheetId = "1ju5Im_BaQURcmKFhf1rr0hOkDpk_68Lvi8IZ4n_oVSw";
+                var sheetId = "529917431";
+                var sheet = CreateSheet(type, fileName, spreadSheetId, sheetId, names);
+                return sheet;
+            }
+
+            //var typeName = typeof(T).Name;
+            //var (spreadSheetId, name2) = helper.GetFileByName(fileName);
+            //var sheetId = helper.GetSheetId(spreadSheetId, typeName);
 
             return default;
         }

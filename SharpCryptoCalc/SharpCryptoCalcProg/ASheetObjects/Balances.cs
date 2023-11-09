@@ -1,6 +1,6 @@
 ﻿namespace SharpCryptoCalcProg.ASheetObjects
 {
-    internal class Balance
+    internal class Balances
     {
         public string Id { get; set; }
 

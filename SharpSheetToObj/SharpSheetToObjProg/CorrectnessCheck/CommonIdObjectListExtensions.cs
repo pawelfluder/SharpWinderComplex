@@ -1,51 +1,73 @@
-﻿using CommonTypesCoreProj.Contracts;
-using CSharpGameSynchProg.Contracts;
-using SharpSheetToObjProg;
+﻿using CSharpGameSynchProg.Register;
+using SharpFileServiceProg.Service;
 using SharpSheetToObjProg.HasProperty;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace CSharpGameSynchProg.Extensions
+namespace SharpSheetToObjProg.CorrectnessCheck
 {
     public static class CommonObjectsExtensions
     {
+        private static IFileService fileService = MyBorder.Container.Resolve<IFileService>();
+
         public static List<CommonObject> ToCommonObjectsList<T>(this List<T> inputList) where T : CommonObject
         {
             var convertedList = inputList.ConvertAll(x => (CommonObject)x);
             return null;
         }
 
-        public static IOrderedEnumerable<PkdObj<T, HasIdDate>> OrderByDateProperty<T>(
-            this List<PkdObj<T, HasIdDate>> inputList) where T : class
+        public static IOrderedEnumerable<PkdObj<T, T2>> OrderByDateProperty<T>(
+            this List<PkdObj<T, T2>> inputList) where T : class
         {
             var result = inputList.OrderByDescending(num => num, new DateComparer<T>());
             return result;
         }
 
-        public static IEnumerable<PkdObj<T, HasIdDate>> OrderByDate<T>(
-            this IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
+        public static IEnumerable<PkdObj<T, T2>> OrderByDate<T>(
+            this IEnumerable<PkdObj<T, T2>> inputList) where T : class
         {
             var result = inputList.OrderByDescending(num => num, new DateComparer<T>());
             return result;
         }
 
-        public static IEnumerable<PkdObj<T, HasIdDate>> OrderByDateId<T>(
-            this IEnumerable<PkdObj<T, HasIdDate>> inputList) where T : class
+        public static IEnumerable<PkdObj<T1, T2>>
+            OrderByDateId<T1, T2>(
+                this IEnumerable<PkdObj<T1, T2>> inputList)
+            where T1 : class
+            where T2 : class
         {
-            var result = inputList.OrderByDescending(num => num, new DateIdComparer<T>());
+            var result = inputList
+                .OrderByDescending(num => num, new PkdObjComparer<T1, T2>(fileService));
             return result;
         }
     }
 
-    public class DateIdComparer<T> : IComparer<PkdObj<T, HasIdDate>> where T : class
+    public class DateIdComparer<T1> : IComparer<PkdObj<T1, T2>> where T1 : class
     {
-        public int Compare(PkdObj<T, HasIdDate> d1, PkdObj<T, HasIdDate> d2)
-        {
-            var s1 = d1.Target.Date.ToString();
-            var s2 = d2.Target.Date.ToString();
+        private IFileService fileService;
 
-            var id1 = d1.Target.Id.ToString();
-            var id2 = d2.Target.Id.ToString();
+        public DateIdComparer(IFileService fileService)
+        {
+            this.fileService = fileService;
+        }
+
+        public int Compare(
+            PkdObj<T1, T2> obj01,
+            PkdObj<T1, T2> obj02)
+        {
+            var propNames = fileService.Reflection.GetPropNames<T2>();
+
+
+
+            foreach (var pName in propNames)
+            {
+                
+            }
+
+
+            var s1 = obj01.Target.Date.ToString();
+            var s2 = obj02.Target.Date.ToString();
+
+            var id1 = obj01.Target.Id.ToString();
+            var id2 = obj02.Target.Id.ToString();
 
             if (s1 == s2)
             {
@@ -70,9 +92,10 @@ namespace CSharpGameSynchProg.Extensions
         }
     }
 
-    public class DateComparer<T> : IComparer<PkdObj<T, HasIdDate>> where T : class
+    
+    public class DateComparer<T> : IComparer<PkdObj<T, T2>> where T : class
     {
-        public int Compare(PkdObj<T, HasIdDate> d1, PkdObj<T, HasIdDate> d2)
+        public int Compare(PkdObj<T, T2> d1, PkdObj<T, T2> d2)
         {
             var s1 = d1.Target.Date.ToString();
             var s2 = d2.Target.Date.ToString();

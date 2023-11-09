@@ -1,7 +1,6 @@
-﻿using CSharpGameSynchProg.Contracts;
-using SharpSheetToObjProg.HasProperty;
+﻿using SharpSheetToObjProg.HasProperty;
 
-namespace CommonTypesCoreProj.Contracts
+namespace SharpSheetToObjProg.CorrectnessCheck
 {
     public abstract class CommonIdObject : CommonObject, IHasId
     {
@@ -16,7 +15,7 @@ namespace CommonTypesCoreProj.Contracts
         public static bool IsDataListCorrupted(List<CommonIdObject> objects)
         {
             var temp = objects.Select(x => (CommonObject)x).ToList();
-            var corrupted = CommonObject.IsDataListCorrupted(temp);
+            var corrupted = IsDataListCorrupted(temp);
 
             var ids = objects.Select(x => x.Id);
             var notDistinctIds = !(ids.Distinct().Count() == ids.Count());
@@ -31,7 +30,7 @@ namespace CommonTypesCoreProj.Contracts
 
         public IList<object> ToIList()
         {
-            var properties = this.GetType().GetProperties();
+            var properties = GetType().GetProperties();
             var result = new List<object>();
             var id = string.Empty;
 

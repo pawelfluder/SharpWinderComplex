@@ -1,10 +1,10 @@
-﻿using GameSynchCoreProj;
-using SharpCryptoCalcProg.Register;
+﻿using SharpCryptoCalcProg.Register;
 using SharpGoogleSheetProg.AAPublic;
 using SharpRepoServiceProg.Service;
 using SharpSetupProg21Private.AAPublic.Extensions;
 using SharpCryptoCalcProg.Info;
 using SharpCryptoCalcProg.ASheetObjects;
+using SharpSheetToObjProg.Service;
 
 namespace SharpCryptoCalcProg
 {
@@ -31,8 +31,15 @@ namespace SharpCryptoCalcProg
         public void Sync()
         {
             var transactionsSheet = sheetGroup.Get<Transactions>();
-            var balanceSheet = sheetGroup.Get<Transactions>();
-            var accountsSheet = sheetGroup.Get<Account>();
+
+            synchService.SyncSheet<BinanceConvert>(transactionsSheet.Names);
+            synchService.SyncSheet<BinanceTransaction>(transactionsSheet.Names);
+            synchService.SyncSheet<BinanceWithdraw>(transactionsSheet.Names);
+            synchService.SyncSheet<Balances>(transactionsSheet.Names);
+            synchService.SyncSheet<Accounts>(transactionsSheet.Names);
+
+            var balanceSheet = sheetGroup.Get<Balances>();
+            var accountsSheet = sheetGroup.Get<Accounts>();
 
             synchService.SyncSheet<Transactions>(transactionsSheet.Names);
             var transactionsList = repoService.GetItemList<Transactions>(transactionsSheet.Names);
@@ -62,7 +69,7 @@ namespace SharpCryptoCalcProg
 
         public IList<IList<object>> ToIListOfIList<T>(IEnumerable<T> inputList) where T : class
         {
-            var result = inputList.Select(x => ToIList(x)).ToList();
+            var result = inputList.Select(x => ToIList2(x)).ToList();
             return result;
         }
 
@@ -86,6 +93,21 @@ namespace SharpCryptoCalcProg
             }
 
             result.Insert(0, id);
+
+            return result;
+        }
+
+        public IList<object> ToIList2(object obj)
+        {
+            var properties = obj.GetType().GetProperties();
+            var result = new List<object>();
+            var id = string.Empty;
+
+            foreach (var property in properties)
+            {
+                var value = property.GetValue(obj, null);
+                result.Add(value);
+            }
 
             return result;
         }

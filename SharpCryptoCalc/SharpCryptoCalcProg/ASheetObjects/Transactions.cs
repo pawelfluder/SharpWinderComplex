@@ -10,6 +10,8 @@
 
         public string Hour { get; set; }
 
+        public string Type { get; set; }
+
         public string From { get; set; }
 
         public string FromSend { get; set; }
@@ -21,5 +23,7 @@
         public string ToReceived { get; set; }
 
         public string ToCurrency { get; set; }
+
+        public string Txid { get; set; }
     }
 }
