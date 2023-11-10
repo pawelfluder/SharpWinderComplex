@@ -1,16 +1,21 @@
 ﻿namespace SharpSheetToObjProg.HasProperty
 {
-    public class T2 : IHasId
+    public class HasIdDate : IHasId, IGetKey
     {
         public string Id { get; set; }
         public string Date { get; set; }
 
-        public T2(
+        public HasIdDate(
             string id,
             string date)
         {
             this.Id = id;
             this.Date = date;
+        }
+
+        public Func<string> GetKey()
+        {
+            return () => Id;
         }
     }
 }

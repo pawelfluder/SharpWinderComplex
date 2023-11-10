@@ -1,10 +1,15 @@
-﻿using System.Reflection;
+﻿using SharpSheetToObjProg.HasProperty;
+using System.Reflection;
 
 namespace SharpSheetToObjProg
 {
     internal class ObjectPacker
     {
-        public List<PkdObj<T1, T2>> Pack<T1, T2>(List<T1> objList) where T2 : class
+        public List<PkdObj<T1, T2>>
+            Pack<T1, T2>(
+                List<T1> objList)
+            where T1 : class
+            where T2 : class, IHasKey
         {
             var result = new List<PkdObj<T1, T2>>();
             if (objList == null)
@@ -23,7 +28,7 @@ namespace SharpSheetToObjProg
             {
                 var args = GetArgs(common, obj).ToArray();
                 var target = (T2)Activator.CreateInstance(type02, args);
-                result.Add(new PkdObj<T1, T2>(obj, target));
+                result.Add(new PkdObj<T1, T2>(obj, target, target.GetKeyFunc()));
             }
 
             return result;
