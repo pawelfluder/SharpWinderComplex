@@ -1,6 +1,8 @@
-﻿namespace SharpSheetToObjProg
+﻿using SharpSheetToObjProg.HasProperty;
+
+namespace SharpSheetToObjProg
 {
-    public class PkdObj<T1, T2>
+    public class PkdObj<T1, T2> : IGetKey
     {
         public PkdObj(
             T1 source,

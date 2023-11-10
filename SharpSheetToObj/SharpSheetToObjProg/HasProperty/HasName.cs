@@ -1,6 +1,6 @@
 ﻿namespace SharpSheetToObjProg.HasProperty
 {
-    public class HasName : IHasName, IHasKey
+    public class HasName : IHasName, IGetKeyFunc
     {
         public string Name { get; set; }
 

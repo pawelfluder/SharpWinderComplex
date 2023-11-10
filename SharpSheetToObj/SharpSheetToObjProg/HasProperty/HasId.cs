@@ -1,6 +1,6 @@
 ﻿namespace SharpSheetToObjProg.HasProperty
 {
-    public class HasId : IHasId, IGetKey
+    public class HasId : IHasId, IGetKeyFunc
     {
         public string Id { get; set; }
 
@@ -9,7 +9,7 @@
             this.Id = id;
         }
 
-        public Func<string> GetKey()
+        public Func<string> GetKeyFunc()
         {
             return () => Id;
         }

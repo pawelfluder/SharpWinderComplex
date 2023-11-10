@@ -2,6 +2,6 @@
 {
     internal interface IGetKey
     {
-        public Func<string> GetKey();
+        public string GetKey();
     }
 }

@@ -9,7 +9,7 @@ namespace SharpSheetToObjProg
             Pack<T1, T2>(
                 List<T1> objList)
             where T1 : class
-            where T2 : class, IHasKey
+            where T2 : class, IGetKeyFunc
         {
             var result = new List<PkdObj<T1, T2>>();
             if (objList == null)

@@ -187,7 +187,7 @@ namespace SharpSheetToObjProg.Service
 
         private void SynchObjects<T1, T2>(string[] names)
             where T1 : class
-            where T2 : class
+            where T2 : class, IGetKeyFunc
         {
             var sheetInfo = sheetGroup.Get(typeof(T1));
             var excelSheetData = GetExcelSheetData<T1>(sheetInfo);
@@ -414,48 +414,49 @@ namespace SharpSheetToObjProg.Service
             return string.Empty;
         }
 
-        private IEnumerable<(bool, PkdObj<T, T2>)> GetMerge<T>(
-            IEnumerable<PkdObj<T, T2>> persistedData,
-            IEnumerable<PkdObj<T, T2>> excelSheetData) where T : class
-        {
-            var result = new List<(bool, PkdObj<T, T2>)>();
+        //private IEnumerable<(bool, PkdObj<T1, T2>)>
+        //    GetMerge<T1, T2>(
+        //        IEnumerable<PkdObj<T1, T2>> persistedData,
+        //        IEnumerable<PkdObj<T1, T2>> excelSheetData) where T1 : class
+        //{
+        //    var result = new List<(bool, PkdObj<T1, T2>)>();
 
-            var existedData = excelSheetData.Where(x => persistedData.Any(y => y.Target.Id == x.Target.Id));
-            var persistedIds = persistedData.Select(x => x.Target.Id).OrderBy(x => x);
-            var excelIds = excelSheetData.Select(x => x.Target.Id).OrderBy(x => x);
+        //    var existedData = excelSheetData.Where(x => persistedData.Any(y => y.Target.Id == x.Target.Id));
+        //    var persistedIds = persistedData.Select(x => x.Target.Id).OrderBy(x => x);
+        //    var excelIds = excelSheetData.Select(x => x.Target.Id).OrderBy(x => x);
 
-            var persistedIdsDuplicated = persistedIds.Where(x => persistedIds.Count(y => y == x) > 1);
-            var excelIdsDuplicated = excelIds.Where(x => excelIds.Count(y => y == x) > 1);
+        //    var persistedIdsDuplicated = persistedIds.Where(x => persistedIds.Count(y => y == x) > 1);
+        //    var excelIdsDuplicated = excelIds.Where(x => excelIds.Count(y => y == x) > 1);
 
-            foreach (var sheetItem in existedData)
-            {
-                PkdObj<T, T2> persistedItem = null;
-                try
-                {
-                    persistedItem = persistedData.Single(x => x.Target.Id == sheetItem.Target.Id);
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message == "Sequence contains more than one matching element")
-                    {
-                        Console.WriteLine("Dwa lub więcej elementów z tym samym id");
-                    }
-                    //throw ex;
-                }
+        //    foreach (var sheetItem in existedData)
+        //    {
+        //        PkdObj<T1, T2> persistedItem = null;
+        //        try
+        //        {
+        //            persistedItem = persistedData.Single(x => x.Target.Id == sheetItem.Target.Id);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex.Message == "Sequence contains more than one matching element")
+        //            {
+        //                Console.WriteLine("Dwa lub więcej elementów z tym samym id");
+        //            }
+        //            //throw ex;
+        //        }
 
-                if (persistedItem == null ||
-                    !persistedItem.Equals(sheetItem))
-                {
-                    result.Add((true, sheetItem));
-                }
-                else
-                {
-                    result.Add((false, sheetItem));
-                }
-            }
+        //        if (persistedItem == null ||
+        //            !persistedItem.Equals(sheetItem))
+        //        {
+        //            result.Add((true, sheetItem));
+        //        }
+        //        else
+        //        {
+        //            result.Add((false, sheetItem));
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         private List<T> GetExcelSheetData<T>(SheetInfo sheetData) where T : class
         {
