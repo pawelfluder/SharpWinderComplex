@@ -7,8 +7,6 @@ using System;
 namespace SharpSheetToObjProg.Merge
 {
     internal class MergeInfo<T1, T2>
-        where T1 : class
-        where T2 : class
     {
         private readonly IFileService fileService;
 
@@ -51,9 +49,12 @@ namespace SharpSheetToObjProg.Merge
                UpdateTuple.Count());
         }
 
-        private void SetIds(
-            IEnumerable<PkdObj<T1, T2>> persistedData,
-            IEnumerable<PkdObj<T1, T2>> sheetData)
+        private void
+            SetIds<T1, T2>(
+                IEnumerable<PkdObj<T1, T2>> persistedData,
+                IEnumerable<PkdObj<T1, T2>> sheetData)
+            where T1 : class
+            where T2 : class, IGetKey
         {
             Ids = new MergeIds(
                persistedData.Select(x => ((IHasId)x.Target).Id).ToList(),
@@ -74,17 +75,17 @@ namespace SharpSheetToObjProg.Merge
             SheetMore = sheetData
                 .Where(x1 => !(persistedData
                 .Select(x2 => x2.Target)
-                .Any(y => ((IHasId)y).Id == ((IHasId)x1.Target).Id)));
+                .Any(GetDoubleKeySelector<T1, T2>())));
 
             PersitedMore = persistedData
                 .Where(x1 => !(sheetData
                 .Select(x2 => x2.Target)
-                .Any(y => ((IHasId)y).Id == ((IHasId)x1.Target).Id)));
+                .Any(y => y.Get == ((IHasId)x1.Target).Id)));
 
             //SameTuple = CompareLists(
             //    sheetData,
             //    persistedData);
-            
+
 
             SameTuple = CompareLists2(
                 sheetData,
@@ -92,6 +93,30 @@ namespace SharpSheetToObjProg.Merge
                 GetKeySelector<T2>());
 
             UpdateTuple = FindDiffrentProperties(SameTuple);
+        }
+
+        private Func<string> GetKey<T>(T y)
+        {
+            var gg = () => (y as IHasId).Id;
+            return gg;
+        }
+
+        private string GetKey<T>(T y)
+        {
+            return ((IHasId)y).Id;
+        }
+
+        private Func<T2, bool> GetDoubleKeySelector<T1, T2>()
+        {
+            var sel01 = GetKeySelector<T1>();
+            var sel02 = GetKeySelector<T2>();
+            var sel = y => ((IHasId)y).Id == sel01;
+            return sel;
+        }
+
+        private Func<PkdObj<T1, T2>, string> GetDoubleKeySelector<T>()
+        {
+
         }
 
         private Func<PkdObj<T1, T2>, string> GetKeySelector<T>()
