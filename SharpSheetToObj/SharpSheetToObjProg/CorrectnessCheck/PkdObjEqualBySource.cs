@@ -21,7 +21,7 @@ namespace SharpSheetToObjProg.CorrectnessCheck
         public bool Equal(PkdObj<T1, T2> obj01, PkdObj<T1, T2> obj02)
         {
             GetProp01<T1>();
-            GetProp02<T1>();
+            GetProp02<T2>();
 
             var thisTuples = GetTuples(propList01, obj01.Target);
             var objTuples = GetTuples(propList02, obj02.Target);

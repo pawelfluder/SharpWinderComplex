@@ -112,7 +112,7 @@ namespace SharpSheetToObjProg.Service
                 CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
             }
 
-            MergeInfo<T1, T2> mergeInfo = new MergeInfo<T1, T2>(persistedData, sheetData);
+            var mergeInfo = new MergeInfo<T1, T2>(persistedData, sheetData);
             var merge = GetMerge<T1, T2>(mergeInfo);
 
             return (merge, mergeInfo);
@@ -249,17 +249,8 @@ namespace SharpSheetToObjProg.Service
             foreach (var property in properties)
             {
                 var value = property.GetValue(obj, null);
-
-                if (property.Name == "Id")
-                {
-                    id = value.ToString();
-                    continue;
-                }
-
                 result.Add(value);
             }
-
-            result.Insert(0, id);
 
             return result;
         }

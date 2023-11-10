@@ -67,8 +67,8 @@ namespace SharpSheetToObjProg.Merge
         }
 
         private void SetCollections(
-                IEnumerable<PkdObj<T1, T2>> persistedData,
-                IEnumerable<PkdObj<T1, T2>> sheetData)
+            IEnumerable<PkdObj<T1, T2>> persistedData,
+            IEnumerable<PkdObj<T1, T2>> sheetData)
         {
             SheetMore = sheetData
                 .Where(x1 => !persistedData
@@ -78,13 +78,11 @@ namespace SharpSheetToObjProg.Merge
                 .Where(x1 => !sheetData
                 .Any(x2 => x2.GetKey() == x1.GetKey()));
 
-            //SameTuple = CompareLists2(
-            //    persistedData,
-            //    sheetData,
-            //    persistedData.First().GetKey());
-                //GetKeySelector<T2>());
+            SameTuple = CompareLists2(
+                persistedData,
+                sheetData);
 
-            //UpdateTuple = FindDiffrentProperties(SameTuple);
+            UpdateTuple = FindDiffrentProperties(SameTuple);
         }
 
         

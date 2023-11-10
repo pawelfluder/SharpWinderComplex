@@ -79,7 +79,12 @@ namespace SharpSheetToObjProg.CorrectnessCheck
             return number;
         }
 
-        private int? CompareId(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
+        private int? CompareDate(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
+        {
+            x.GetKey()
+        }
+
+            private int? CompareId(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
         {
             var value01 = ((IHasId)x.Target).Id.ToString();
             var value02 = ((IHasId)y.Target).Id.ToString();
