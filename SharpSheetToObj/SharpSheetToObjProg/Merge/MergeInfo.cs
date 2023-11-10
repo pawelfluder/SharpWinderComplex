@@ -2,11 +2,12 @@
 using SharpFileServiceProg.Service;
 using SharpSheetToObjProg.CorrectnessCheck;
 using SharpSheetToObjProg.HasProperty;
-using System;
 
 namespace SharpSheetToObjProg.Merge
 {
     internal class MergeInfo<T1, T2>
+        where T1 : class
+        where T2 : class
     {
         private readonly IFileService fileService;
 
@@ -27,7 +28,7 @@ namespace SharpSheetToObjProg.Merge
             SetCounts(persistedData, sheetData);
             if (HasId<T1>())
             {
-                SetIds(persistedData, sheetData);
+                SetIds<T1,T2>(persistedData, sheetData);
             }
         }
 
@@ -54,94 +55,67 @@ namespace SharpSheetToObjProg.Merge
                 IEnumerable<PkdObj<T1, T2>> persistedData,
                 IEnumerable<PkdObj<T1, T2>> sheetData)
             where T1 : class
-            where T2 : class, IGetKey
+            where T2 : class
         {
             Ids = new MergeIds(
-               persistedData.Select(x => ((IHasId)x.Target).Id).ToList(),
-               sheetData.Select(x => ((IHasId)x.Target).Id).ToList(),
-               PersitedMore.Select(x => ((IHasId)x.Target).Id).ToList(),
-               SheetMore.Select(x => ((IHasId)x.Target).Id).ToList(),
-               SameTuple.Select(x => ((IHasId)x.Item1.Target).Id).ToList(),
-               UpdateTuple.Select(x => ((IHasId)x.Item1.Target).Id).ToList());
+               persistedData.Select(x => x.GetKey()).ToList(),
+               sheetData.Select(x => x.GetKey()).ToList(),
+               PersitedMore.Select(x => x.GetKey()).ToList(),
+               SheetMore.Select(x => x.GetKey()).ToList(),
+               SameTuple.Select(x => x.Item1.GetKey()).ToList(),
+               UpdateTuple.Select(x => x.Item1.GetKey()).ToList());
         }
 
         private void SetCollections(
-            IEnumerable<PkdObj<T1, T2>> persistedData,
-            IEnumerable<PkdObj<T1, T2>> sheetData)
+                IEnumerable<PkdObj<T1, T2>> persistedData,
+                IEnumerable<PkdObj<T1, T2>> sheetData)
         {
-            var selector = GetKeySelector<T2>();
-            //var gg = y => ((IHasId)y).Id == ((IHasId)x1.Target).Id));
-
             SheetMore = sheetData
-                .Where(x1 => !(persistedData
-                .Select(x2 => x2.Target)
-                .Any(GetDoubleKeySelector<T1, T2>())));
+                .Where(x1 => !persistedData
+                .Any(x2 => x2.GetKey() == x1.GetKey()));
 
             PersitedMore = persistedData
-                .Where(x1 => !(sheetData
-                .Select(x2 => x2.Target)
-                .Any(y => y.Get == ((IHasId)x1.Target).Id)));
+                .Where(x1 => !sheetData
+                .Any(x2 => x2.GetKey() == x1.GetKey()));
 
-            //SameTuple = CompareLists(
+            //SameTuple = CompareLists2(
+            //    persistedData,
             //    sheetData,
-            //    persistedData);
+            //    persistedData.First().GetKey());
+                //GetKeySelector<T2>());
 
-
-            SameTuple = CompareLists2(
-                sheetData,
-                persistedData,
-                GetKeySelector<T2>());
-
-            UpdateTuple = FindDiffrentProperties(SameTuple);
+            //UpdateTuple = FindDiffrentProperties(SameTuple);
         }
 
-        private Func<string> GetKey<T>(T y)
-        {
-            var gg = () => (y as IHasId).Id;
-            return gg;
-        }
+        
+        //private Func<PkdObj<T1, T2>, string> GetKeySelector<T>()
+        //{
+        //    Func<PkdObj<T1, T2>, string> keySelector;
+        //    if (typeof(T2).GetInterface(nameof(IHasId)) != null)
+        //    {
+        //        keySelector = x => ((IHasId)x.Target).Id;
+        //        return keySelector;
+        //    }
+        //    if (typeof(T2).GetInterface(nameof(IHasDate)) != null)
+        //    {
+        //        keySelector = x => ((IHasDate)x.Target).Date;
+        //        return keySelector;
+        //    }
+        //    if (typeof(T2).GetInterface(nameof(IHasName)) != null)
+        //    {
+        //        keySelector = x => ((IHasName)x.Target).Name;
+        //        return keySelector;
+        //    }
+        //    return null;
+        //}
 
-        private string GetKey<T>(T y)
+        public IEnumerable<(T, T)>
+            CompareLists2<T>(
+                IEnumerable<T> list1,
+                IEnumerable<T> list2)
+            where T: class, IGetKey
         {
-            return ((IHasId)y).Id;
-        }
-
-        private Func<T2, bool> GetDoubleKeySelector<T1, T2>()
-        {
-            var sel01 = GetKeySelector<T1>();
-            var sel02 = GetKeySelector<T2>();
-            var sel = y => ((IHasId)y).Id == sel01;
-            return sel;
-        }
-
-        private Func<PkdObj<T1, T2>, string> GetDoubleKeySelector<T>()
-        {
-
-        }
-
-        private Func<PkdObj<T1, T2>, string> GetKeySelector<T>()
-        {
-            Func<PkdObj<T1, T2>, string> keySelector;
-            if (typeof(T2).GetInterface(nameof(IHasId)) != null)
-            {
-                keySelector = x => ((IHasId)x.Target).Id;
-                return keySelector;
-            }
-            if (typeof(T2).GetInterface(nameof(IHasDate)) != null)
-            {
-                keySelector = x => ((IHasDate)x.Target).Date;
-                return keySelector;
-            }
-            if (typeof(T2).GetInterface(nameof(IHasName)) != null)
-            {
-                keySelector = x => ((IHasName)x.Target).Name;
-                return keySelector;
-            }
-            return null;
-        }
-
-        public IEnumerable<(T, T)> CompareLists2<T, TKey>(IEnumerable<T> list1, IEnumerable<T> list2, Func<T, TKey> keySelector)
-        {
+            Func<T, string> keySelector = (x) => x.GetKey();
             var commonElements = list1
                 .Join(list2, keySelector, keySelector, (item1, item2) => (item1, item2))
                 .ToList();
