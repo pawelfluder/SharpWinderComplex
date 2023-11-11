@@ -13,6 +13,7 @@ namespace SharpCryptoCalcProg
 
         public void Convert(
             IEnumerable<Transactions> inputList,
+            IEnumerable<Accounts> accounts,
             out List<Balances> outBalanceList,
             out List<Accounts> outAccountsList)
         {
@@ -42,13 +43,34 @@ namespace SharpCryptoCalcProg
                     ToDiff = tra.ToReceived
                 };
 
-                
+
                 balanceList.Add(balance);
             }
 
             outBalanceList = balanceList.OrderByDescending(x => x.Id).ToList();
-            outAccountsList = new List<Accounts>(accountsList);
+            outAccountsList = GetAccounts(accounts);
             accountsList.Clear();
+        }
+
+        private List<Accounts> GetAccounts(
+            IEnumerable<Accounts> accounts)
+        {
+            var gg = new List<Accounts>(accountsList);
+            if (accounts != null)
+            {
+                foreach (var ac in accountsList)
+                {
+                    var gg2 = accounts.SingleOrDefault(x => x.Name == ac.Name);
+                    if (gg2 != null)
+                    {
+                        ac.Real = gg2.Real;
+                    }
+                }
+            }
+
+            gg = gg.OrderByDescending(x => x.Name).ToList();
+
+            return gg;
         }
 
         private void AddTransaction(
@@ -66,7 +88,7 @@ namespace SharpCryptoCalcProg
             var valueToAdd = decimal.Parse(valueString.Replace(',', '.'));
             var valueCurrent = decimal.Parse(account.Balance.Replace(',', '.'));
             var sum = valueCurrent + valueToAdd;
-            account.Balance = sum.ToString();
+            account.Balance = sum.ToString().Replace('.', ',');
         }
     }
 }

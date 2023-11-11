@@ -16,46 +16,10 @@ namespace SharpSheetToObjProg.CorrectnessCheck
 
         public int Compare(PkdObj<T1, T2> x, PkdObj<T1, T2> y)
         {
-            GetPropNames01<T2>();
-            
-            int? idNumber = null;
-            int? dateNumber = null;
-            int? nameNumber = null;
-
-            if (propNames.Any(x => x == "Id"))
-            {
-                idNumber = CompareId(x, y);
-            }
-
-            if (propNames.Any(x => x == "Date"))
-            {
-                dateNumber = CompareDate(x, y);
-            }
-
-            if (propNames.Any(x => x == "Name"))
-            {
-                nameNumber = CompareName(x, y);
-            }
-
-            if (dateNumber != null &&
-                dateNumber != 0)
-            {
-                return (int)dateNumber;
-            }
-
-            if (idNumber != null &&
-                idNumber != 0)
-            {
-                return (int)idNumber;
-            }
-
-            if (nameNumber != null &&
-                nameNumber != 0)
-            {
-                return (int)nameNumber;
-            }
-
-            return 0;
+            var value01 = x.GetKey();
+            var value02 = y.GetKey();
+            var number = GetNumber(value01, value02);
+            return number;
         }
 
         private string[] GetPropNames01<T>()
@@ -79,30 +43,33 @@ namespace SharpSheetToObjProg.CorrectnessCheck
             return number;
         }
 
-        private int? CompareDate(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
+        private int? CompareKey(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
         {
-            x.GetKey()
-        }
-
-            private int? CompareId(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
-        {
-            var value01 = ((IHasId)x.Target).Id.ToString();
-            var value02 = ((IHasId)y.Target).Id.ToString();
-
+            var value01 = x.GetKey();
+            var value02 = y.GetKey();
             var number = GetNumber(value01, value02);
             return number;
         }
+
+        //private int? CompareId(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
+        //{
+        //    var value01 = ((IHasId)x.Target).Id.ToString();
+        //    var value02 = ((IHasId)y.Target).Id.ToString();
+
+        //    var number = GetNumber(value01, value02);
+        //    return number;
+        //}
         
-        private int? CompareName(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
-        {
-            var value01 = ((IHasName)x.Target).Name.ToString();
-            var value02 = ((IHasName)y.Target).Name.ToString();
+        //private int? CompareName(PkdObj<T1, T2>? x, PkdObj<T1, T2>? y)
+        //{
+        //    var value01 = ((IHasName)x.Target).Name.ToString();
+        //    var value02 = ((IHasName)y.Target).Name.ToString();
 
-            var number = GetNumber(value01, value02);
-            return number;
-        }
+        //    var number = GetNumber(value01, value02);
+        //    return number;
+        //}
 
-        private static int? GetNumber(string value01, string value02)
+        private static int GetNumber(string value01, string value02)
         {
             if (value01 == value02)
             {
@@ -118,7 +85,5 @@ namespace SharpSheetToObjProg.CorrectnessCheck
 
             return -1;
         }
-
-        
     }
 }

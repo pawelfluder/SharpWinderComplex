@@ -1,7 +1,6 @@
 ﻿using CSharpGameSynchProg.Register;
 using SharpFileServiceProg.Service;
 using SharpSheetToObjProg.CorrectnessCheck;
-using SharpSheetToObjProg.HasProperty;
 
 namespace SharpSheetToObjProg.Merge
 {
@@ -107,54 +106,52 @@ namespace SharpSheetToObjProg.Merge
         //    return null;
         //}
 
-        public IEnumerable<(T, T)>
-            CompareLists2<T>(
-                IEnumerable<T> list1,
-                IEnumerable<T> list2)
-            where T: class, IGetKey
+        public IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)>
+            CompareLists2(
+                IEnumerable<PkdObj<T1, T2>> list1,
+                IEnumerable<PkdObj<T1, T2>> list2)
         {
-            Func<T, string> keySelector = (x) => x.GetKey();
+            Func<PkdObj<T1, T2>, string> keySelector = (x) => x.GetKey();
             var commonElements = list1
                 .Join(list2, keySelector, keySelector, (item1, item2) => (item1, item2))
                 .ToList();
-
             return commonElements;
         }
 
-        public IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)>
-            CompareLists<T>(
-            IEnumerable<PkdObj<T, T2>> list1,
-            IEnumerable<PkdObj<T, T2>> list2)
-        {
-            var result = new List<(PkdObj<T, T2>, PkdObj<T, T2>)>();
-            var count = list1.Count();
+        //public IEnumerable<(PkdObj<T, T2>, PkdObj<T, T2>)>
+        //    CompareLists<T>(
+        //    IEnumerable<PkdObj<T, T2>> list1,
+        //    IEnumerable<PkdObj<T, T2>> list2)
+        //{
+        //    var result = new List<(PkdObj<T, T2>, PkdObj<T, T2>)>();
+        //    var count = list1.Count();
 
-            for (int i = 0; i < count; i++)
-            {
-                var item1 = list1.ElementAt(i);
-                var item2 = list2.ElementAt(i);
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        var item1 = list1.ElementAt(i);
+        //        var item2 = list2.ElementAt(i);
 
-                if (((IHasId)item1.Target).Id == ((IHasId)item2.Target).Id)
-                {
-                    result.Add((item1, item2));
-                }
-            }
+        //        if (((IHasId)item1.Target).Id == ((IHasId)item2.Target).Id)
+        //        {
+        //            result.Add((item1, item2));
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
-        public List<Tuple<T, T>>
-            CompareLists2<T, TKey>(
-                List<T> list1,
-                List<T> list2,
-                Func<T, TKey> keySelector)
-        {
-            var commonElements = list1
-                .Join(list2, keySelector, keySelector, (item1, item2) => Tuple.Create(item1, item2))
-                .ToList();
+        //public List<Tuple<T, T>>
+        //    CompareLists2<T, TKey>(
+        //        List<T> list1,
+        //        List<T> list2,
+        //        Func<T, TKey> keySelector)
+        //{
+        //    var commonElements = list1
+        //        .Join(list2, keySelector, keySelector, (item1, item2) => Tuple.Create(item1, item2))
+        //        .ToList();
 
-            return commonElements;
-        }
+        //    return commonElements;
+        //}
 
         private IEnumerable<(PkdObj<T1, T2>, PkdObj<T1, T2>)>
             FindDiffrentProperties(

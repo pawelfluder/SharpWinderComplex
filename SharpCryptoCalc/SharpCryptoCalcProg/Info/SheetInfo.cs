@@ -1,6 +1,4 @@
-﻿using Google.Apis.Sheets.v4.Data;
-
-namespace SharpCryptoCalcProg.Info
+﻿namespace SharpCryptoCalcProg.Info
 {
     public class SheetInfo
     {
@@ -12,13 +10,15 @@ namespace SharpCryptoCalcProg.Info
         public string DataRange { get; private set; }
         public string SpreadSheetId { get; private set; }
         public string SheetId { get; private set; }
+        public Dictionary<char, string> Formulas { get; private set; }
 
         public SheetInfo(
             Type type,
             string fileName,
             string spreadSheetId,
             string sheetId,
-            string[] namesArray)
+            string[] namesArray,
+            Dictionary<char, string> formulas)
         {
             Type = type;
             FileName = fileName;
@@ -28,6 +28,7 @@ namespace SharpCryptoCalcProg.Info
             Names = namesArray;
             ColumnNames = GetPropertyNames(type);
             DataRange = GetDataRange(ColumnNames.Count());
+            Formulas = formulas;
         }
 
         private List<string> GetPropertyNames(Type type)

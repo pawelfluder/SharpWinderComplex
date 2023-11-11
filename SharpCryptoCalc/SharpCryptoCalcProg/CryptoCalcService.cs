@@ -1,7 +1,6 @@
 ﻿using SharpCryptoCalcProg.Register;
 using SharpGoogleSheetProg.AAPublic;
 using SharpRepoServiceProg.Service;
-using SharpSetupProg21Private.AAPublic.Extensions;
 using SharpCryptoCalcProg.Info;
 using SharpCryptoCalcProg.ASheetObjects;
 using SharpSheetToObjProg.Service;
@@ -38,12 +37,12 @@ namespace SharpCryptoCalcProg
             synchService.SyncSheet<BinanceTransaction>(transactionsSheet.Names);
             synchService.SyncSheet<BinanceWithdraw>(transactionsSheet.Names);
             synchService.SyncSheet<Balances>(transactionsSheet.Names);
-            synchService.SyncSheet<Accounts>(transactionsSheet.Names);
+            var accounts = synchService.SyncSheet<Accounts>(transactionsSheet.Names);
 
-            synchService.SyncSheet<Transactions>(transactionsSheet.Names);
-            var transactionsList = repoService.GetItemList<Transactions>(transactionsSheet.Names);
+            var transactionsList = synchService.SyncSheet<Transactions>(transactionsSheet.Names);
             balanceConverter.Convert(
                 transactionsList,
+                accounts,
                 out var balancesList,
                 out var accountsDict);
 

@@ -50,25 +50,36 @@ namespace SharpSheetToObjProg.Service
             string fileName,
             string spreadSheetId,
             string sheetId,
-            string title)
+            string title,
+            Dictionary<char, string> formulas)
         {
-            var sheetInfo = new SheetInfo(type, fileName, spreadSheetId, sheetId, title);
+            var sheetInfo = new SheetInfo(
+                type,
+                fileName,
+                spreadSheetId,
+                sheetId,
+                title,
+                formulas);
             sheetGroup.Add(type, sheetInfo);
         }
 
-        public void SyncSheet<T1>(params string[] names) where T1 : class
+        public IEnumerable<T1>
+                SyncSheet<T1>(params string[] names)
+            where T1 : class
         {
             if (HasIdDate<T1>())
             {
-                SynchObjects<T1, HasId>(names);
-                return;
+                var result = SynchObjects<T1, HasId>(names);
+                return result;
             }
 
             if (HasName<T1>())
             {
-                SynchObjects<T1, HasName>(names);
-                return;
+                var result = SynchObjects<T1, HasName>(names);
+                return result;
             }
+
+            return null;
         }
 
         private bool HasIdDate<T>()
@@ -185,7 +196,7 @@ namespace SharpSheetToObjProg.Service
             return false;
         }
 
-        private void SynchObjects<T1, T2>(string[] names)
+        private IEnumerable<T1> SynchObjects<T1, T2>(string[] names)
             where T1 : class
             where T2 : class, IGetKeyFunc
         {
@@ -199,25 +210,29 @@ namespace SharpSheetToObjProg.Service
 
             var (mergedData, mergeInfo) = MergeData(pkdSheetData, pkdPersistedData);
 
-            if (mergeInfo.Counts.PersistedMore > 0 ||
+            if (!(mergeInfo.Counts.PersistedMore > 0 ||
                 mergeInfo.Counts.SheetMore > 0 ||
-                mergeInfo.Counts.Update > 0)
+                mergeInfo.Counts.Update > 0))
             {
-                var sortedMergedData = mergedData.OrderByDateId().ToList();
-                var persitedDataToSave = sortedMergedData.Select(x => x.Source);
-                var sheetDataToSave = ToIListOfIList(sortedMergedData);
-
-                var success2 = LastAllDataChecks(sortedMergedData);
-
-                var yamlResult = repoService.SaveItemList<T1>(persitedDataToSave, names);
-                var headerNames = fileService.Reflection.GetPropNames<T1>();
-
-                googleSheetService.Worker.PasteDataToSheet(
-                    sheetInfo.SpreadSheetId,
-                    sheetInfo.SheetTabName,
-                    sheetDataToSave,
-                    headerNames);
+                return persistedData;
             }
+
+            var sortedMergedData = mergedData.OrderByDateId().ToList();
+            var persitedDataToSave = sortedMergedData.Select(x => x.Source);
+            var sheetDataToSave = ToIListOfIList(sortedMergedData);
+
+            var success2 = LastAllDataChecks(sortedMergedData);
+
+            var yamlResult = repoService.SaveItemList<T1>(persitedDataToSave, names);
+            var headerNames = fileService.Reflection.GetPropNames<T1>();
+
+            googleSheetService.Worker.PasteDataToSheet(
+                sheetInfo.SpreadSheetId,
+                sheetInfo.SheetTabName,
+                sheetDataToSave,
+                headerNames);
+
+            return persitedDataToSave;
         }
 
         private bool

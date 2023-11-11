@@ -21,5 +21,12 @@
         public string Real { get; set; }
 
         public string Diff { get; set; }
+
+        public static Dictionary<char, string> GetFormulas()
+        {
+            var f = new Dictionary<char, string>();
+            f.Add('D', "=C4-B4");
+            return f;
+        }
     }
 }

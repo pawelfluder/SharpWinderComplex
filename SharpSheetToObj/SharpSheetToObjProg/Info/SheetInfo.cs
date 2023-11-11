@@ -9,16 +9,18 @@
         public string SheetTabName { get; private set; }
         public List<string> ColumnNames { get; private set; }
         public string DataRange { get; private set; }
+        public string Title { get; private set; }
 
         public SheetInfo(
             Type type,
             string fileName,
             string spreadSheetId,
             string sheetId,
-            string title)
+            string title,
+            Dictionary<char, string> formulas)
         {
             Type = type;
-            SheetTabName = type.Name;
+            FileName = fileName;
             SpreadSheetId = spreadSheetId;
             SheetId = sheetId;
             SheetTabName = type.Name;

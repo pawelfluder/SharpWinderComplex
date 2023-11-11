@@ -18,8 +18,4 @@
     <ProjectReference Include="..\..\SharpSheetToObj\SharpSheetToObjProg\SharpSheetToObjProg.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="NewFolder\" />
-  </ItemGroup>
-
 </Project>

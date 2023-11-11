@@ -7,7 +7,7 @@ namespace SharpSheetToObjProg
     {
         public List<PkdObj<T1, T2>>
             Pack<T1, T2>(
-                List<T1> objList)
+                IEnumerable<T1> objList)
             where T1 : class
             where T2 : class, IGetKeyFunc
         {

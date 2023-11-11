@@ -1,5 +1,4 @@
 ﻿using SharpCryptoCalcProg.ASheetObjects;
-using System.Collections.Generic;
 
 namespace SharpCryptoCalcProg.Info
 {
@@ -29,7 +28,7 @@ namespace SharpCryptoCalcProg.Info
 
         public SheetInfoGroup(
             SheetInfoCache cache,
-            Action<Type, string, string, string, string> registerMethod)
+            Action<Type, string, string, string, string, Dictionary<char, string>> registerMethod)
         {
             dictionary = new Dictionary<Type, SheetInfo>();
             this.cache = cache;
@@ -51,9 +50,9 @@ namespace SharpCryptoCalcProg.Info
         //}
 
         public void Register(
-            Action<Type, string, string, string, string> registerMethod)
+            Action<Type, string, string, string, string, Dictionary<char, string>> registerMethod)
         {
-            foreach (var entry in dictionary)
+            foreach (KeyValuePair<Type, SheetInfo> entry in dictionary)
             {
                 var title = CreateTitle(entry.Value.Names);
                 registerMethod.Invoke(
@@ -61,7 +60,8 @@ namespace SharpCryptoCalcProg.Info
                     entry.Value.FileName,
                     entry.Value.SpreadSheetId,
                     entry.Value.SheetId,
-                    title);
+                    title,
+                    entry.Value.Formulas);
             }
         }
 

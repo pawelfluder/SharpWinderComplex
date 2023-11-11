@@ -1,5 +1,4 @@
 ﻿using SharpContainerProg.AAPublic;
-using Registration01 = SharpSetupProg21Private.AAPublic.Registration;
 
 namespace CSharpGameSynchProg.Register
 {
@@ -7,7 +6,6 @@ namespace CSharpGameSynchProg.Register
     {
         public override void Registrations()
         {
-            //new Registration01().Registrations();
         }
     }
 }
