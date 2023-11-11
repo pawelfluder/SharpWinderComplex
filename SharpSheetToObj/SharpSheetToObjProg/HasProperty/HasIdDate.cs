@@ -1,4 +1,6 @@
-﻿namespace SharpSheetToObjProg.HasProperty
+﻿using SharpFileServiceProg.Service;
+
+namespace SharpSheetToObjProg.HasProperty
 {
     public class HasIdDate : IHasId, IGetKeyFunc
     {
@@ -16,6 +18,11 @@
         public Func<string> GetKeyFunc()
         {
             return () => Id;
+        }
+
+        public static bool HasProps<T>(IFileService fileService)
+        {
+            return fileService.Reflection.HasProp<T>("Id", "Date");
         }
     }
 }

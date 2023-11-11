@@ -1,4 +1,6 @@
-﻿namespace SharpSheetToObjProg.HasProperty
+﻿using SharpFileServiceProg.Service;
+
+namespace SharpSheetToObjProg.HasProperty
 {
     public class HasName : IHasName, IGetKeyFunc
     {
@@ -12,6 +14,11 @@
         public Func<string> GetKeyFunc()
         {
             return () => Name;
+        }
+
+        public static bool HasProps<T>(IFileService fileService)
+        {
+            return fileService.Reflection.HasProp<T>("Name");
         }
     }
 }

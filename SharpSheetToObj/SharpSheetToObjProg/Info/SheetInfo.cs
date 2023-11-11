@@ -9,14 +9,14 @@
         public string SheetTabName { get; private set; }
         public List<string> ColumnNames { get; private set; }
         public string DataRange { get; private set; }
-        public string Title { get; private set; }
+        public string[] Names { get; private set; }
 
         public SheetInfo(
             Type type,
             string fileName,
             string spreadSheetId,
             string sheetId,
-            string title,
+            string[] names,
             Dictionary<char, string> formulas)
         {
             Type = type;
@@ -26,6 +26,7 @@
             SheetTabName = type.Name;
             ColumnNames = GetPropertyNames(type);
             DataRange = GetDataRange(ColumnNames.Count());
+            Names = names;
         }
 
         private List<string> GetPropertyNames(Type type)

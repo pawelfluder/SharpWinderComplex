@@ -28,7 +28,7 @@ namespace SharpCryptoCalcProg.Info
 
         public SheetInfoGroup(
             SheetInfoCache cache,
-            Action<Type, string, string, string, string, Dictionary<char, string>> registerMethod)
+            Action<Type, string, string, string, string[], Dictionary<char, string>> registerMethod)
         {
             dictionary = new Dictionary<Type, SheetInfo>();
             this.cache = cache;
@@ -50,7 +50,7 @@ namespace SharpCryptoCalcProg.Info
         //}
 
         public void Register(
-            Action<Type, string, string, string, string, Dictionary<char, string>> registerMethod)
+            Action<Type, string, string, string, string[], Dictionary<char, string>> registerMethod)
         {
             foreach (KeyValuePair<Type, SheetInfo> entry in dictionary)
             {
@@ -60,7 +60,7 @@ namespace SharpCryptoCalcProg.Info
                     entry.Value.FileName,
                     entry.Value.SpreadSheetId,
                     entry.Value.SheetId,
-                    title,
+                    entry.Value.Names,
                     entry.Value.Formulas);
             }
         }

@@ -28,8 +28,8 @@ namespace SharpSheetToObjProg.Service
         public SychService()
         {
             sheetGroup = new SheetInfoGroup();
-            googleDocsService = MyBorder.Container.Resolve<IGoogleDocsService>();
-            googleDriveService = MyBorder.Container.Resolve<IGoogleDriveService>();
+            //googleDocsService = MyBorder.Container.Resolve<IGoogleDocsService>();
+            //googleDriveService = MyBorder.Container.Resolve<IGoogleDriveService>();
             googleSheetService = MyBorder.Container.Resolve<IGoogleSheetService>();
             fileService = MyBorder.Container.Resolve<IFileService>();
             repoService = MyBorder.Container.Resolve<IRepoService>();
@@ -50,7 +50,7 @@ namespace SharpSheetToObjProg.Service
             string fileName,
             string spreadSheetId,
             string sheetId,
-            string title,
+            string[] names,
             Dictionary<char, string> formulas)
         {
             var sheetInfo = new SheetInfo(
@@ -58,53 +58,29 @@ namespace SharpSheetToObjProg.Service
                 fileName,
                 spreadSheetId,
                 sheetId,
-                title,
+                names,
                 formulas);
             sheetGroup.Add(type, sheetInfo);
         }
 
         public IEnumerable<T1>
-                SyncSheet<T1>(params string[] names)
+                SyncSheet<T1>()
             where T1 : class
         {
-            if (HasIdDate<T1>())
+            var sheetInfo = sheetGroup.Get<T1>();
+            if (HasId.HasProps<T1>(fileService))
             {
-                var result = SynchObjects<T1, HasId>(names);
+                var result = SynchObjects<T1, HasId>(sheetInfo.Names);
                 return result;
             }
 
-            if (HasName<T1>())
+            if (HasName.HasProps<T1>(fileService))
             {
-                var result = SynchObjects<T1, HasName>(names);
+                var result = SynchObjects<T1, HasName>(sheetInfo.Names);
                 return result;
             }
 
             return null;
-        }
-
-        private bool HasIdDate<T>()
-        {
-            return fileService.Reflection.HasProp<T>("Id", "Date");
-        }
-
-        private bool HasId<T>()
-        {
-            return fileService.Reflection.HasProp<T>("Id");
-        }
-
-        private bool HasDate<T>()
-        {
-            return fileService.Reflection.HasProp<T>("Date");
-        }
-
-        private bool HasName<T>()
-        {
-            return fileService.Reflection.HasProp<T>("Name");
-        }
-
-        private void PrintInfo(string from, string to)
-        {
-            Console.WriteLine("From " + from + " To " + to);
         }
 
         private (IEnumerable<PkdObj<T1, T2>> mergedData, MergeInfo<T1, T2> changesInfo)
@@ -114,11 +90,11 @@ namespace SharpSheetToObjProg.Service
             where T1 : class
             where T2 : class
         {
-            if (HasId<T1>())
+            if (HasId.HasProps<T1>(fileService))
             {
                 CheckDistinctIds(sheetData.Select(x => (IHasId)x.Target));
             }
-            if (HasId<T2>())
+            if (HasId.HasProps<T1>(fileService))
             {
                 CheckDistinctIds(persistedData.Select(x => (IHasId)x.Target));
             }
@@ -308,7 +284,7 @@ namespace SharpSheetToObjProg.Service
                 return false;
             }
 
-            if (HasId<T1>())
+            if (HasId.HasProps<T1>(fileService))
             {
                 var success3 = CheckDistinctIds(pkdSheetData
                     .Select(x => (IHasId)x.Target));
@@ -369,7 +345,7 @@ namespace SharpSheetToObjProg.Service
             CheckDistinctIds<T>(
                 IEnumerable<T> data)
         {
-            if (HasId<T>())
+            if (HasId.HasProps<T>(fileService))
             {
                 var distinctList = data.EDistinctBy(x => ((IHasId)x).Id).ToList();
                 var result = data.Count() == distinctList.Count();

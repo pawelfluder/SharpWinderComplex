@@ -2,10 +2,10 @@
 using SharpGoogleSheetProg.AAPublic;
 using SharpRepoServiceProg.Service;
 using SharpCryptoCalcProg.Info;
-using SharpCryptoCalcProg.ASheetObjects;
 using SharpSheetToObjProg.Service;
+using SharpCryptoCalcProg.ASheetObjects;
 
-namespace SharpCryptoCalcProg
+namespace SharpCryptoCalcProg.Service
 {
     internal class CryptoCalcService
     {
@@ -21,7 +21,7 @@ namespace SharpCryptoCalcProg
             sheetGroup = new SheetInfoGroup(
                 new SheetInfoCache(),
                 synchService.RegisterSheet);
-            
+
             repoService = MyBorder.Container.Resolve<IRepoService>();
             sheetService = MyBorder.Container.Resolve<IGoogleSheetService>();
             balanceConverter = new BalanceConverter();
@@ -29,17 +29,16 @@ namespace SharpCryptoCalcProg
 
         public void Sync()
         {
-            var transactionsSheet = sheetGroup.Get<Transactions>();
             var balanceSheet = sheetGroup.Get<Balances>();
             var accountsSheet = sheetGroup.Get<Accounts>();
 
-            synchService.SyncSheet<BinanceConvert>(transactionsSheet.Names);
-            synchService.SyncSheet<BinanceTransaction>(transactionsSheet.Names);
-            synchService.SyncSheet<BinanceWithdraw>(transactionsSheet.Names);
-            synchService.SyncSheet<Balances>(transactionsSheet.Names);
-            var accounts = synchService.SyncSheet<Accounts>(transactionsSheet.Names);
+            synchService.SyncSheet<BinanceConvert>();
+            synchService.SyncSheet<BinanceTransaction>();
+            synchService.SyncSheet<BinanceWithdraw>();
+            synchService.SyncSheet<Balances>();
+            var accounts = synchService.SyncSheet<Accounts>();
 
-            var transactionsList = synchService.SyncSheet<Transactions>(transactionsSheet.Names);
+            var transactionsList = synchService.SyncSheet<Transactions>();
             balanceConverter.Convert(
                 transactionsList,
                 accounts,

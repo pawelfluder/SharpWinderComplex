@@ -1,4 +1,5 @@
 ﻿using SharpCryptoCalcProg.Register;
+using SharpCryptoCalcProg.Service;
 
 namespace SharpCryptoCalcProg
 {
@@ -7,8 +8,8 @@ namespace SharpCryptoCalcProg
         static void Main(string[] args)
         {
             var tmp = MyBorder.Container;
-            var CryptoCalcService = new CryptoCalcService();
-            CryptoCalcService.Sync();
+            var cryptoCalcService = new CryptoCalcService();
+            cryptoCalcService.Sync();
         }
     }
 }
